@@ -7,26 +7,26 @@ import {
   deleteDoc,
   doc,
   getDocs,
-  orderBy,
-  query,
 } from "firebase/firestore";
 import { firestore } from "@/utils/firebaseConfig";
-import { Plus, Trash2, Pencil, Tag } from "lucide-react";
+import { Plus, Trash2, Pencil, Tag, RefreshCw } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
-type Product = {
+type ServiceItem = {
   id: string;
-  name: string;
-  category: string;
-  price: number;
-  dealPrice?: number;
-  isDeal: boolean;
-  inStock: boolean;
+  title: string;
+  category: string; // tv-stands | wall-panels | wardrobes | kitchens | ceilings | doors
+  summary?: string;
+  bullets?: string[];
+  imageUrl?: string;
+  active?: boolean;
+  order?: number;
+  featured?: boolean; // optional (if you want a tag)
   updatedAt?: any;
 };
 
-export default function AdminProductsPage() {
-  const [items, setItems] = useState<Product[]>([]);
+export default function AdminServicesPage() {
+  const [items, setItems] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const searchParams = useSearchParams();
@@ -35,16 +35,18 @@ export default function AdminProductsPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const q = query(
-        collection(firestore, "products"),
-        orderBy("updatedAt", "desc")
-      );
-      const snap = await getDocs(q);
-      setItems(
-        snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Product[]
-      );
+      // ✅ No orderBy -> no composite index requirements
+      const snap = await getDocs(collection(firestore, "services"));
+      const data = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as any),
+      })) as ServiceItem[];
+
+      // ✅ Client-side sort (stable + safe)
+      const sorted = data.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+      setItems(sorted);
     } catch (e) {
-      console.error("Admin products load failed:", e);
+      console.error("Admin services load failed:", e);
       setItems([]);
     } finally {
       setLoading(false);
@@ -53,30 +55,30 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
     if (!cat) return items;
-
-    if (cat === "deals") return items.filter((p) => p.isDeal);
-
-    return items.filter((p) => (p.category || "").toLowerCase() === cat);
+    if (cat === "inactive") return items.filter((s) => s.active === false);
+    if (cat === "featured") return items.filter((s) => !!s.featured);
+    return items.filter((s) => (s.category || "").toLowerCase() === cat);
   }, [items, cat]);
 
   const grouped = useMemo(() => {
-    const map: Record<string, Product[]> = {};
-    for (const p of filtered) {
-      const k = (p.category || "other").toLowerCase();
+    const map: Record<string, ServiceItem[]> = {};
+    for (const s of filtered) {
+      const k = (s.category || "other").toLowerCase();
       map[k] = map[k] || [];
-      map[k].push(p);
+      map[k].push(s);
     }
     return map;
   }, [filtered]);
 
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this product?")) return;
+    if (!confirm("Delete this service item?")) return;
     try {
-      await deleteDoc(doc(firestore, "products", id));
+      await deleteDoc(doc(firestore, "services", id));
       setItems((prev) => prev.filter((x) => x.id !== id));
     } catch (e) {
       console.error("Delete failed:", e);
@@ -87,32 +89,41 @@ export default function AdminProductsPage() {
   return (
     <main className="bg-[--background] text-[--foreground]">
       <section className="container py-10">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold">
-              Products {cat ? `• ${cat}` : ""}
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              Services {cat ? `• ${cat}` : ""}
             </h1>
-            <p className="text-sm text-white/70 mt-1">
-              Add, edit, delete products for the public store.
+            <p className="text-sm text-[--muted] mt-1">
+              Add, edit, and delete service items used by /c/[category].
             </p>
           </div>
 
-          <Link
-            href="/admin/dashboard/products/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[--brand-primary] hover:opacity-90 transition text-sm font-semibold"
-          >
-            <Plus size={18} /> New Product
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={load}
+              className="btn btn-outline"
+              aria-label="Refresh"
+            >
+              <RefreshCw size={18} />
+              Refresh
+            </button>
+
+            <Link href="/admin/dashboard/services/new" className="btn btn-primary">
+              <Plus size={18} /> New Service
+            </Link>
+          </div>
         </div>
 
         <div className="mt-8">
           {loading ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-8">
+            <div className="rounded-2xl border border-[--border] bg-[--surface] p-8 shadow-[var(--shadow)]">
               Loading…
             </div>
           ) : filtered.length === 0 ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-8">
-              No products yet. Click “New Product”.
+            <div className="rounded-2xl border border-[--border] bg-[--surface] p-8 shadow-[var(--shadow)]">
+              No services yet. Click “New Service”.
             </div>
           ) : (
             <div className="space-y-6">
@@ -121,52 +132,72 @@ export default function AdminProductsPage() {
                 .map((catKey) => (
                   <div
                     key={catKey}
-                    className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden"
+                    className="rounded-2xl border border-[--border] bg-[--surface] overflow-hidden shadow-[var(--shadow)]"
                   >
-                    <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
-                      <div className="font-semibold capitalize">{catKey}</div>
-                      <button
-                        onClick={load}
-                        className="text-xs px-3 py-1 rounded-md border border-white/15 bg-white/5 hover:bg-white/10 transition"
-                      >
-                        Refresh
-                      </button>
+                    <div className="px-5 py-4 border-b border-[--border] flex items-center justify-between gap-3">
+                      <div className="font-extrabold capitalize">{catKey}</div>
+
+                      <div className="text-xs text-[--muted]">
+                        {grouped[catKey].length} item(s)
+                      </div>
                     </div>
 
-                    <div className="divide-y divide-white/10">
-                      {grouped[catKey].map((p) => (
+                    <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+                      {grouped[catKey].map((s) => (
                         <div
-                          key={p.id}
-                          className="px-5 py-4 flex items-center justify-between gap-3"
+                          key={s.id}
+                          className="px-5 py-4 flex items-start justify-between gap-4"
                         >
-                          <div>
-                            <div className="font-semibold flex items-center gap-2">
-                              {p.name}
-                              {p.isDeal && <Tag size={16} className="opacity-80" />}
-                              {!p.inStock && (
-                                <span className="text-xs px-2 py-0.5 rounded bg-black/40 border border-white/15">
-                                  out of stock
+                          <div className="min-w-0">
+                            <div className="font-extrabold flex items-center gap-2 flex-wrap">
+                              <span className="truncate">{s.title}</span>
+
+                              {s.featured ? (
+                                <span className="inline-flex items-center gap-1 text-xs font-extrabold px-2 py-0.5 rounded-full border border-[--border] bg-[--surface-2]">
+                                  <Tag size={14} /> featured
                                 </span>
-                              )}
+                              ) : null}
+
+                              {s.active === false ? (
+                                <span className="text-xs font-extrabold px-2 py-0.5 rounded-full border border-[--border] bg-[--surface-2]">
+                                  inactive
+                                </span>
+                              ) : null}
                             </div>
-                            <div className="text-sm text-white/70">
-                              Price: P{p.price}
-                              {p.isDeal && p.dealPrice
-                                ? ` • Deal: P${p.dealPrice}`
-                                : ""}
+
+                            {s.summary ? (
+                              <p className="text-sm text-[--muted] mt-1 leading-relaxed">
+                                {s.summary}
+                              </p>
+                            ) : (
+                              <p className="text-sm text-[--muted] mt-1 leading-relaxed">
+                                No summary set.
+                              </p>
+                            )}
+
+                            <div className="text-xs text-[--muted] mt-2">
+                              Order: <b className="text-[--foreground]">{s.order ?? "—"}</b>
+                              {s.imageUrl ? " • Image ✓" : " • Image —"}
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 shrink-0">
                             <Link
-                              href={`/admin/dashboard/products/${p.id}/edit`}
-                              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 transition text-sm"
+                              href={`/admin/dashboard/services/${s.id}/edit`}
+                              className="btn btn-outline"
                             >
                               <Pencil size={16} /> Edit
                             </Link>
+
                             <button
-                              onClick={() => onDelete(p.id)}
-                              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 transition text-sm"
+                              type="button"
+                              onClick={() => onDelete(s.id)}
+                              className="btn btn-outline"
+                              style={{
+                                borderColor: "rgba(239,68,68,0.35)",
+                                background: "rgba(239,68,68,0.08)",
+                                color: "rgba(239,68,68,0.95)",
+                              }}
                             >
                               <Trash2 size={16} /> Delete
                             </button>

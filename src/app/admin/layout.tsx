@@ -1,19 +1,26 @@
-// src/app/admin/layout.tsx
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import React, { ReactNode } from 'react';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 
 export const metadata = {
-  title: 'iHub – Admin',
+  title: "AD Interior Design – Admin",
 };
 
-export default async function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const store = await cookies();
-  const token = store.get('admin_token')?.value;
+  const token = store.get("admin_token")?.value;
 
   if (!token) {
-    redirect('/login');
+    redirect("/admin/login");
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-[--background] text-[--foreground]">
+      {children}
+    </div>
+  );
 }

@@ -8,58 +8,63 @@ import { firestore } from "@/utils/firebaseConfig";
 import { UploadButton } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
-type Category = "phones" | "laptops" | "gadgets" | "clothing" | "shoes";
+type ServiceCategory =
+  | "tv-stands"
+  | "wall-panels"
+  | "wardrobes"
+  | "kitchens"
+  | "ceilings"
+  | "doors";
 
 type UploadedFile = { url?: string } | null | undefined;
 
-export default function NewProductPage() {
+export default function NewServicePage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
-    name: "",
-    category: "phones" as Category,
-    brand: "",
-    price: "",
-    dealPrice: "",
-    isDeal: false,
-    inStock: true,
+    title: "",
+    category: "tv-stands" as ServiceCategory,
+    summary: "",
+    bulletsText: "", // newline separated
+    order: "",
+    active: true,
+    featured: false,
     imageUrl: "",
-    description: "",
   });
 
   const save = async () => {
-    if (!form.name.trim()) return alert("Product name required");
+    if (!form.title.trim()) return alert("Title is required.");
 
-    const price = Number(form.price);
-    if (!Number.isFinite(price)) return alert("Valid price required");
-
-    const dealPrice = form.dealPrice ? Number(form.dealPrice) : null;
-    if (form.isDeal && form.dealPrice && !Number.isFinite(dealPrice)) {
-      return alert("Valid deal price required");
+    const order = form.order.trim() ? Number(form.order) : null;
+    if (form.order.trim() && !Number.isFinite(order)) {
+      return alert("Order must be a number.");
     }
+
+    const bullets = form.bulletsText
+      .split("\n")
+      .map((x) => x.trim())
+      .filter(Boolean);
 
     setSaving(true);
     try {
-      await addDoc(collection(firestore, "products"), {
-        name: form.name.trim(),
+      await addDoc(collection(firestore, "services"), {
+        title: form.title.trim(),
         category: form.category,
-        brand: form.brand.trim() || null,
-        price,
-        dealPrice: form.isDeal ? dealPrice : null,
-        isDeal: !!form.isDeal,
-        inStock: !!form.inStock,
+        summary: form.summary.trim() || null,
+        bullets: bullets.length ? bullets : null,
+        order: order ?? null,
+        active: !!form.active,
+        featured: !!form.featured,
         imageUrl: form.imageUrl.trim() || "/placeholder.png",
-        description: form.description.trim() || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        admin_id: "admin",
       });
 
-      router.push("/admin/dashboard/products");
+      router.push("/admin/dashboard/services");
     } catch (err) {
       console.error("Save failed:", err);
-      alert("Failed to save product");
+      alert("Failed to save service item.");
     } finally {
       setSaving(false);
     }
@@ -68,80 +73,125 @@ export default function NewProductPage() {
   return (
     <main className="bg-[--background] text-[--foreground]">
       <section className="container py-10 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-6">New Product</h1>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              New Service Item
+            </h1>
+            <p className="text-sm text-[--muted] mt-1">
+              This powers /c/[category] and can be featured on the site.
+            </p>
+          </div>
 
-        <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-6">
-          <input
-            className="form-input w-full"
-            placeholder="Product name"
-            value={form.name}
-            onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))}
-          />
+          <button onClick={() => history.back()} className="btn btn-outline">
+            Cancel
+          </button>
+        </div>
 
-          <select
-            className="form-input w-full"
-            value={form.category}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, category: e.target.value as Category }))
-            }
-          >
-            <option value="phones">Phones</option>
-            <option value="laptops">Laptops</option>
-            <option value="gadgets">Gadgets</option>
-            <option value="clothing">Clothing</option>
-            <option value="shoes">Shoes</option>
-          </select>
-
-          <input
-            className="form-input w-full"
-            placeholder="Brand (optional)"
-            value={form.brand}
-            onChange={(e) => setForm((s) => ({ ...s, brand: e.target.value }))}
-          />
-
-          <input
-            className="form-input w-full"
-            placeholder="Price (e.g. 3500)"
-            value={form.price}
-            onChange={(e) => setForm((s) => ({ ...s, price: e.target.value }))}
-          />
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={form.isDeal}
-              onChange={(e) =>
-                setForm((s) => ({ ...s, isDeal: e.target.checked }))
-              }
-            />
-            This is a deal
-          </label>
-
-          {form.isDeal && (
-            <input
-              className="form-input w-full"
-              placeholder="Deal price"
-              value={form.dealPrice}
-              onChange={(e) =>
-                setForm((s) => ({ ...s, dealPrice: e.target.value }))
-              }
-            />
-          )}
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={form.inStock}
-              onChange={(e) =>
-                setForm((s) => ({ ...s, inStock: e.target.checked }))
-              }
-            />
-            In stock
-          </label>
-
-          {/* ✅ UploadThing (correct generics for your version) */}
+        <div className="mt-6 space-y-4 rounded-2xl border border-[--border] bg-[--surface] p-6 shadow-[var(--shadow)]">
           <div className="space-y-2">
-            <div className="text-sm font-medium">Upload image</div>
+            <label className="text-sm font-extrabold">Title</label>
+            <input
+              className="input"
+              placeholder="e.g. Floating TV Stand (LED + Storage)"
+              value={form.title}
+              onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
+            />
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-extrabold">Category</label>
+              <select
+                className="input"
+                value={form.category}
+                onChange={(e) =>
+                  setForm((s) => ({
+                    ...s,
+                    category: e.target.value as ServiceCategory,
+                  }))
+                }
+              >
+                <option value="tv-stands">TV Stands</option>
+                <option value="wall-panels">Wall Panels</option>
+                <option value="wardrobes">Wardrobes</option>
+                <option value="kitchens">Kitchens</option>
+                <option value="ceilings">Ceilings</option>
+                <option value="doors">Doors</option>
+              </select>
+              <p className="text-xs text-[--muted]">
+                Must match /c/{form.category}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-extrabold">Order (optional)</label>
+              <input
+                className="input"
+                placeholder="e.g. 1"
+                value={form.order}
+                onChange={(e) => setForm((s) => ({ ...s, order: e.target.value }))}
+              />
+              <p className="text-xs text-[--muted]">
+                Lower numbers show first.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-extrabold">Summary (optional)</label>
+            <textarea
+              className="input"
+              rows={3}
+              placeholder="Short summary shown on cards."
+              value={form.summary}
+              onChange={(e) => setForm((s) => ({ ...s, summary: e.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-extrabold">
+              Bullets (optional)
+            </label>
+            <textarea
+              className="input"
+              rows={5}
+              placeholder={"One bullet per line.\nLED strip option\nSoft-close hinges\nMatte / gloss finishes"}
+              value={form.bulletsText}
+              onChange={(e) =>
+                setForm((s) => ({ ...s, bulletsText: e.target.value }))
+              }
+            />
+          </div>
+
+          {/* Toggles */}
+          <div className="flex flex-wrap gap-4 pt-2">
+            <label className="inline-flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.active}
+                onChange={(e) =>
+                  setForm((s) => ({ ...s, active: e.target.checked }))
+                }
+              />
+              Active
+            </label>
+
+            <label className="inline-flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.featured}
+                onChange={(e) =>
+                  setForm((s) => ({ ...s, featured: e.target.checked }))
+                }
+              />
+              Featured
+            </label>
+          </div>
+
+          {/* UploadThing */}
+          <div className="space-y-2 pt-2">
+            <div className="text-sm font-extrabold">Upload image</div>
 
             <UploadButton<OurFileRouter, "fileUploader">
               endpoint="fileUploader"
@@ -155,45 +205,43 @@ export default function NewProductPage() {
               }}
             />
 
-            {form.imageUrl && (
-              <div className="text-xs opacity-70 break-all">
+            {form.imageUrl ? (
+              <div className="text-xs text-[--muted] break-all">
                 Current image URL: {form.imageUrl}
+              </div>
+            ) : (
+              <div className="text-xs text-[--muted]">
+                If you don’t upload, we’ll use /placeholder.png
               </div>
             )}
           </div>
 
           {/* Manual URL */}
-          <input
-            className="form-input w-full"
-            placeholder="Or paste image URL"
-            value={form.imageUrl}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, imageUrl: e.target.value }))
-            }
-          />
-
-          <textarea
-            className="form-input w-full"
-            rows={4}
-            placeholder="Description (optional)"
-            value={form.description}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, description: e.target.value }))
-            }
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-extrabold">Or paste image URL</label>
+            <input
+              className="input"
+              placeholder="https://..."
+              value={form.imageUrl}
+              onChange={(e) =>
+                setForm((s) => ({ ...s, imageUrl: e.target.value }))
+              }
+            />
+          </div>
 
           <div className="flex gap-3 pt-2">
             <button
               disabled={saving}
               onClick={save}
-              className="px-4 py-2 rounded-lg bg-[--brand-primary] hover:opacity-90 transition text-sm font-semibold"
+              className="btn btn-primary"
             >
               {saving ? "Saving…" : "Save"}
             </button>
 
             <button
+              type="button"
               onClick={() => history.back()}
-              className="px-4 py-2 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 transition text-sm"
+              className="btn btn-outline"
             >
               Cancel
             </button>
