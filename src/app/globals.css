@@ -89,11 +89,15 @@ img, video {
    Typography
    ========================================================= */
 
+/* ✅ IMPORTANT FIX:
+   Do NOT hard-force heading color here.
+   Let components/pages control color (e.g. hero wants white).
+*/
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--foreground);
+  /* color removed intentionally */
 }
 
 p {
