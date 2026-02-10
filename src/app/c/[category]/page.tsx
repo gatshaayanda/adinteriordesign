@@ -120,7 +120,6 @@ export default function CategoryPage() {
       try {
         setLoading(true);
 
-        // ✅ Fetch services by category (no orderBy → no composite index)
         const qRef = query(
           collection(firestore, "services"),
           where("category", "==", category)
@@ -180,23 +179,56 @@ export default function CategoryPage() {
                 <span className="text-[--muted]">AD Interior Design • Botswana</span>
               </div>
 
-              <h1 className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight">
+              <h1 className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight text-[--foreground]">
                 {meta.title}
               </h1>
+
               <p className="mt-2 text-[--muted] leading-relaxed">{meta.subtitle}</p>
 
-              {/* Sub-nav (quick switching) */}
+              {/* Sub-nav */}
               <div className="mt-5 flex flex-wrap gap-2">
-                <Link href="/c/tv-stands" prefetch={false} className="menu-link">
+                <Link
+                  href="/c/tv-stands"
+                  prefetch={false}
+                  className={`menu-link ${
+                    category === "tv-stands"
+                      ? "bg-[--surface-2] border border-[--border] text-[--foreground]"
+                      : ""
+                  }`}
+                >
                   TV Stands
                 </Link>
-                <Link href="/c/wall-panels" prefetch={false} className="menu-link">
+                <Link
+                  href="/c/wall-panels"
+                  prefetch={false}
+                  className={`menu-link ${
+                    category === "wall-panels"
+                      ? "bg-[--surface-2] border border-[--border] text-[--foreground]"
+                      : ""
+                  }`}
+                >
                   Wall Panels
                 </Link>
-                <Link href="/c/wardrobes" prefetch={false} className="menu-link">
+                <Link
+                  href="/c/wardrobes"
+                  prefetch={false}
+                  className={`menu-link ${
+                    category === "wardrobes"
+                      ? "bg-[--surface-2] border border-[--border] text-[--foreground]"
+                      : ""
+                  }`}
+                >
                   Wardrobes
                 </Link>
-                <Link href="/c/kitchens" prefetch={false} className="menu-link">
+                <Link
+                  href="/c/kitchens"
+                  prefetch={false}
+                  className={`menu-link ${
+                    category === "kitchens"
+                      ? "bg-[--surface-2] border border-[--border] text-[--foreground]"
+                      : ""
+                  }`}
+                >
                   Kitchens
                 </Link>
                 <Link href="/gallery" prefetch={false} className="menu-link">
@@ -228,13 +260,14 @@ export default function CategoryPage() {
 
           {/* Helper card */}
           <div className="mt-8 rounded-2xl border border-[--border] bg-[--surface] p-5">
-            <div className="font-semibold flex items-center gap-2">
+            <div className="font-semibold flex items-center gap-2 text-[--foreground]">
               <Ruler size={16} className="text-[--brand-primary]" />
               What to send for a fast quote
             </div>
             <p className="text-sm text-[--muted] mt-2 leading-relaxed">
-              Send your <b>city/town</b>, <b>measurements (W×H)</b>, preferred <b>finish</b>,
-              and a <b>photo/video</b> of the wall/space. If you’re unsure, just describe the room and we’ll guide you.
+              Send your <b>city/town</b>, <b>measurements (W×H)</b>, preferred{" "}
+              <b>finish</b>, and a <b>photo/video</b> of the wall/space. If
+              you’re unsure, describe the room and we’ll guide you.
             </p>
           </div>
         </div>
@@ -249,18 +282,21 @@ export default function CategoryPage() {
                 key={idx}
                 className="rounded-2xl border border-[--border] bg-[--surface] p-5 animate-pulse"
               >
-                <div className="h-36 rounded-xl bg-black/10 dark:bg-white/10" />
-                <div className="h-4 w-2/3 mt-4 rounded bg-black/10 dark:bg-white/10" />
-                <div className="h-3 w-full mt-3 rounded bg-black/10 dark:bg-white/10" />
-                <div className="h-10 w-full mt-5 rounded bg-black/10 dark:bg-white/10" />
+                <div className="h-36 rounded-xl bg-[--surface-2]" />
+                <div className="h-4 w-2/3 mt-4 rounded bg-[--surface-2]" />
+                <div className="h-3 w-full mt-3 rounded bg-[--surface-2]" />
+                <div className="h-10 w-full mt-5 rounded bg-[--surface-2]" />
               </div>
             ))}
           </div>
         ) : items.length === 0 ? (
           <div className="rounded-2xl border border-[--border] bg-[--surface] p-8 text-center">
-            <div className="text-lg font-semibold">No items listed here yet</div>
+            <div className="text-lg font-semibold text-[--foreground]">
+              No items listed here yet
+            </div>
             <p className="text-[--muted] mt-2">
-              You can still request a quote — we’ll guide measurements and finish options.
+              You can still request a quote — we’ll guide measurements and finish
+              options.
             </p>
 
             <div className="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
@@ -306,7 +342,12 @@ export default function CategoryPage() {
                 >
                   <div className="relative h-40">
                     {s.imageUrl ? (
-                      <Image src={s.imageUrl} alt={s.title} fill className="object-cover" />
+                      <Image
+                        src={s.imageUrl}
+                        alt={s.title}
+                        fill
+                        className="object-cover"
+                      />
                     ) : (
                       <div className="absolute inset-0 bg-[--surface-2]" />
                     )}
@@ -315,7 +356,9 @@ export default function CategoryPage() {
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="font-semibold text-base">{s.title}</div>
+                        <div className="font-semibold text-base text-[--foreground]">
+                          {s.title}
+                        </div>
                         {s.summary ? (
                           <p className="text-sm text-[--muted] mt-2 leading-relaxed">
                             {s.summary}
@@ -332,7 +375,7 @@ export default function CategoryPage() {
                       <ul className="mt-4 space-y-2 text-sm text-[--muted]">
                         {s.bullets.slice(0, 4).map((b, idx) => (
                           <li key={idx} className="flex gap-2">
-                            <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-black/30 dark:bg-white/30" />
+                            <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[--muted-2]" />
                             <span className="leading-relaxed">{b}</span>
                           </li>
                         ))}
@@ -356,7 +399,8 @@ export default function CategoryPage() {
                     </div>
 
                     <p className="text-xs text-[--muted] mt-4 inline-flex items-center gap-2">
-                      <Wrench size={14} /> Tip: send measurements + photos/video for fastest pricing.
+                      <Wrench size={14} /> Tip: send measurements + photos/video
+                      for fastest pricing.
                     </p>
                   </div>
                 </div>

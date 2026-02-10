@@ -3,15 +3,19 @@
 
 import Link from "next/link";
 import {
-  ShieldCheck,
-  MessageCircle,
-  FileText,
   Sparkles,
-  CheckCircle2,
+  Ruler,
+  Wrench,
+  MessageCircle,
+  ShieldCheck,
   ArrowRight,
+  Home,
+  PanelsTopLeft,
+  LayoutGrid,
+  Sofa,
 } from "lucide-react";
 
-const WHATSAPP_NUMBER = "+26772971852";
+const WHATSAPP_NUMBER = "+267 77 807 112";
 
 function waLink(message: string) {
   const digits = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
@@ -19,188 +23,288 @@ function waLink(message: string) {
 }
 
 export default function AboutPage() {
+  const whatsappMsg = waLink(
+    [
+      "Hi AD Interior Design 👋",
+      "",
+      "I’d like to ask about your services.",
+      "",
+      "Project type:",
+      "City/Town:",
+      "Measurements (W×H):",
+      "Finish (slats/marble/wood/gloss/matte):",
+      "",
+      "I will send photos/video of the space.",
+    ].join("\n")
+  );
+
   return (
     <main id="main" className="bg-[--background] text-[--foreground]">
       {/* HERO */}
-      <section className="container py-10 md:py-14">
-        <div className="rounded-3xl border border-white/10 bg-white/5 overflow-hidden">
-          <div className="p-6 md:p-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/15 bg-white/10 text-xs">
-              <ShieldCheck size={14} />
-              Sparkle Legacy • About
+      <section className="border-b border-[--border] bg-[--background]">
+        <div className="container py-14">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[--border] bg-[--surface] text-xs font-semibold text-[--muted]">
+              <Sparkles size={14} className="text-[--brand-accent]" />
+              AD Interior Design • Botswana
             </div>
 
-            <h1 className="mt-4 text-3xl md:text-5xl font-extrabold tracking-tight">
-              A modern insurance broker experience — built for clarity.
+            <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">
+              About AD Interior Design
             </h1>
 
-            <p className="mt-4 text-white/70 max-w-3xl">
-              Sparkle Legacy helps individuals and businesses in Botswana request quotes,
-              understand cover, and navigate claims with confidence. We keep it simple,
-              transparent, and WhatsApp-first for fast support.
+            <p className="mt-4 text-base sm:text-lg text-[--muted] leading-relaxed">
+              AD Interior Design specializes in premium custom interior builds —
+              TV stands, wall panels (slats & marble), wardrobes, kitchens,
+              ceilings and clean modern finishes.
             </p>
 
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <a
-                href={waLink(
-                  "Hi Sparkle Legacy 👋 I’d like help choosing the right cover.\n\nName:\nCity/Town:\nWhat do you need insured?"
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary"
-              >
+            <p className="mt-4 text-base sm:text-lg text-[--muted] leading-relaxed">
+              We focus on strong workmanship, clean lines, neat installation and
+              a smooth quoting process. Send measurements + photos/video of your
+              space and we’ll guide you from design to final installation.
+            </p>
+
+            <div className="mt-7 flex flex-col sm:flex-row gap-3">
+              <a href={whatsappMsg} className="btn btn-primary">
                 <MessageCircle size={18} />
-                Chat on WhatsApp
+                WhatsApp Us
               </a>
 
-              <Link href="/c/short-term" className="btn btn-outline" prefetch={false}>
-                Browse Cover Types
+              <Link href="/services" prefetch={false} className="btn btn-outline">
+                View Services
                 <ArrowRight size={18} />
               </Link>
 
-              <Link href="/claims" className="btn btn-outline" prefetch={false}>
-                Claims Help
-                <FileText size={18} />
+              <Link href="/gallery" prefetch={false} className="btn btn-outline">
+                View Gallery
+                <ArrowRight size={18} />
               </Link>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              <span className="badge inline-flex items-center gap-2">
+                <Ruler size={14} /> Measurements guided
+              </span>
+              <span className="badge inline-flex items-center gap-2">
+                <Wrench size={14} /> Installation available
+              </span>
+              <span className="badge inline-flex items-center gap-2">
+                <ShieldCheck size={14} /> Clean premium finishes
+              </span>
             </div>
           </div>
         </div>
       </section>
 
       {/* WHAT WE DO */}
-      <section className="container pb-12">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2">
-              <Sparkles size={18} />
-              What we help with
+      <section className="py-14">
+        <div className="container">
+          <div className="max-w-3xl">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              What we do
             </h2>
 
-            <ul className="mt-4 space-y-2 text-sm text-white/75">
-              {[
-                "Short-Term cover: motor, home & contents, travel, gadgets, liability",
-                "Long-Term cover: life, funeral, disability, dread disease",
-                "Retirement & wealth: planning, savings, annuities (product-dependent)",
-                "SME cover: assets, liability, fleet, business continuity",
-                "Claims support: guidance on steps, forms, and required documents",
-              ].map((x) => (
-                <li key={x} className="flex gap-2">
-                  <CheckCircle2 size={16} className="mt-0.5 opacity-80" />
-                  <span>{x}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-5">
-              <Link href="/contact" className="btn btn-outline w-full" prefetch={false}>
-                Contact
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2">
-              <ShieldCheck size={18} />
-              How it works
-            </h2>
-
-            <ol className="mt-4 space-y-3 text-sm text-white/75">
-              {[
-                {
-                  title: "Tell us what you need",
-                  desc: "Message us the product, city/town, and basic details.",
-                },
-                {
-                  title: "We confirm requirements",
-                  desc: "We’ll tell you what docs/info are needed for a clean quote or claim.",
-                },
-                {
-                  title: "We help you choose",
-                  desc: "We explain options in simple language before you commit.",
-                },
-                {
-                  title: "We support you after",
-                  desc: "Need help updating cover or submitting a claim? We guide the steps.",
-                },
-              ].map((s) => (
-                <li key={s.title} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <div className="font-semibold text-white/90">{s.title}</div>
-                  <div className="mt-1 text-white/70">{s.desc}</div>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2">
-              <FileText size={18} />
-              What to send (fastest results)
-            </h2>
-
-            <p className="mt-3 text-sm text-white/70">
-              When requesting quotes or claims, sharing the right details saves time.
+            <p className="mt-3 text-[--muted] leading-relaxed">
+              We build custom interior solutions for homes, apartments and small
+              business spaces. Our work is designed to look modern, clean and
+              premium — while still being practical for everyday use.
             </p>
+          </div>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm font-semibold text-white/85">Quotes</div>
-              <ul className="mt-2 space-y-2 text-sm text-white/75">
-                {[
-                  "Cover type + product",
-                  "City/Town",
-                  "Key details (e.g. car model/registration, sum assured, dependants)",
-                  "Name + phone (optional)",
-                ].map((x) => (
-                  <li key={x} className="flex gap-2">
-                    <span className="mt-[6px] h-1.5 w-1.5 rounded-full bg-white/40" />
-                    <span>{x}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm font-semibold text-white/85">Claims</div>
-              <ul className="mt-2 space-y-2 text-sm text-white/75">
-                {[
-                  "Incident date + what happened",
-                  "Location + photos/evidence",
-                  "Forms / supporting documents (as available)",
-                  "Policy or reference (if you have it)",
-                ].map((x) => (
-                  <li key={x} className="flex gap-2">
-                    <span className="mt-[6px] h-1.5 w-1.5 rounded-full bg-white/40" />
-                    <span>{x}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-5 flex flex-col gap-2">
-              <a
-                href={waLink(
-                  "Hi Sparkle Legacy 👋 What documents do you need for my quote/claim?\n\nProduct:\nCover type:\nCity/Town:"
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary w-full"
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-8">
+            {[
+              {
+                icon: <LayoutGrid size={18} />,
+                title: "TV Stands / Wall Units",
+                desc: "Modern floating designs, storage layouts and LED-ready builds.",
+                href: "/c/tv-stands",
+              },
+              {
+                icon: <PanelsTopLeft size={18} />,
+                title: "Wall Panels",
+                desc: "Slats & marble feature walls that upgrade the whole space instantly.",
+                href: "/c/wall-panels",
+              },
+              {
+                icon: <Sofa size={18} />,
+                title: "Wardrobes",
+                desc: "Sliding or hinged wardrobes, clean finishing and custom compartments.",
+                href: "/c/wardrobes",
+              },
+              {
+                icon: <Home size={18} />,
+                title: "Kitchens & Cabinets",
+                desc: "Strong cabinetry builds with clean lines and practical storage.",
+                href: "/c/kitchens",
+              },
+            ].map((item) => (
+              <Link
+                key={item.title}
+                href={item.href}
+                prefetch={false}
+                className="rounded-2xl border border-[--border] bg-[--surface] p-5 shadow-[var(--shadow)] hover:bg-[--surface-2] transition"
               >
-                <MessageCircle size={18} />
-                Ask on WhatsApp
-              </a>
+                <div className="flex items-center gap-2 font-semibold">
+                  <span className="grid place-items-center h-9 w-9 rounded-xl border border-[--border] bg-[--surface-2]">
+                    {item.icon}
+                  </span>
+                  {item.title}
+                </div>
 
-              <Link href="/claims" className="btn btn-outline w-full" prefetch={false}>
-                Claims Page
-                <ArrowRight size={18} />
+                <p className="text-sm text-[--muted] mt-2 leading-relaxed">
+                  {item.desc}
+                </p>
+
+                <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold">
+                  View category <ArrowRight size={16} />
+                </div>
               </Link>
-            </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        <p className="mt-8 text-xs text-white/55">
-          Note: Cover terms, premiums, exclusions, and benefits depend on insurer underwriting
-          and policy wording.
-        </p>
+      {/* HOW IT WORKS */}
+      <section className="py-14 bg-[--surface] border-y border-[--border]">
+        <div className="container">
+          <div className="max-w-3xl">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              How the process works
+            </h2>
+
+            <p className="mt-3 text-[--muted] leading-relaxed">
+              We keep the process simple. You send the basics, we confirm the
+              finish and layout, then we build and install.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3 mt-8">
+            {[
+              {
+                icon: <Ruler size={18} />,
+                title: "Step 1: Send measurements",
+                desc: "Send wall width & height, plus photos/video of the space.",
+              },
+              {
+                icon: <Sparkles size={18} />,
+                title: "Step 2: Confirm finish",
+                desc: "Choose slats, marble, wood, gloss or matte finish.",
+              },
+              {
+                icon: <Wrench size={18} />,
+                title: "Step 3: Build + install",
+                desc: "We confirm timeline and deliver a clean final installation.",
+              },
+            ].map((step) => (
+              <div
+                key={step.title}
+                className="rounded-2xl border border-[--border] bg-[--background] p-5"
+              >
+                <div className="flex items-center gap-2 font-semibold">
+                  <span className="grid place-items-center h-9 w-9 rounded-xl border border-[--border] bg-[--surface]">
+                    {step.icon}
+                  </span>
+                  {step.title}
+                </div>
+
+                <p className="text-sm text-[--muted] mt-2 leading-relaxed">
+                  {step.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* WHY CHOOSE US */}
+      <section className="py-14">
+        <div className="container">
+          <div className="max-w-3xl">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Why clients choose us
+            </h2>
+
+            <p className="mt-3 text-[--muted] leading-relaxed">
+              We’re not just selling a build — we’re delivering a finished look.
+              We focus on neat finishing, strong materials and professional
+              installation.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+            {[
+              {
+                title: "Clean finishing",
+                desc: "Neat edges, clean panel alignment and professional installs.",
+              },
+              {
+                title: "Fast quoting",
+                desc: "Send measurements + photos/video and we quote quickly on WhatsApp.",
+              },
+              {
+                title: "Guided recommendations",
+                desc: "We help you choose the right layout and finish for your space.",
+              },
+              {
+                title: "Modern styles",
+                desc: "Minimal, premium interior looks that match current trends.",
+              },
+              {
+                title: "Custom builds",
+                desc: "Each project is built around your wall size, TV size and storage needs.",
+              },
+              {
+                title: "Installation support",
+                desc: "We confirm timeline clearly and handle installation where available.",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border border-[--border] bg-[--surface] p-5"
+              >
+                <div className="font-semibold">{item.title}</div>
+                <p className="text-sm text-[--muted] mt-2 leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="py-14 bg-[--surface] border-t border-[--border]">
+        <div className="container">
+          <div className="rounded-3xl border border-[--border] bg-[--background] p-6 md:p-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                  Want a quote?
+                </h3>
+                <p className="text-[--muted] mt-2 max-w-2xl leading-relaxed">
+                  Send your city/town + measurements + photos/video of the space.
+                  We’ll confirm finish options, timeline, and total cost.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a href={whatsappMsg} className="btn btn-primary">
+                  <MessageCircle size={18} />
+                  WhatsApp Quote
+                </a>
+
+                <Link href="/services" prefetch={false} className="btn btn-outline">
+                  Browse Services <ArrowRight size={18} />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-6 text-xs text-[--muted] text-center">
+            WhatsApp: {WHATSAPP_NUMBER}
+          </p>
+        </div>
       </section>
     </main>
   );

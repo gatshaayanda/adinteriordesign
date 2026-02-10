@@ -42,7 +42,6 @@ const nav = [
   { label: "Home", href: "/", icon: <Sparkles size={18} /> },
   { label: "Services", href: "/services", icon: <Wrench size={18} /> },
   { label: "Gallery", href: "/gallery", icon: <Images size={18} /> },
-  { label: "Pricing", href: "/pricing", icon: <Tag size={18} /> },
   { label: "About", href: "/about", icon: <BadgeInfo size={18} /> },
   { label: "Contact", href: "/contact", icon: <MessageCircle size={18} /> },
 ];

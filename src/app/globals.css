@@ -334,3 +334,17 @@ a:hover, a:focus {
     animation: none !important;
   }
 }
+
+
+/* Force readable default text everywhere */
+main, section, header, footer {
+  color: var(--foreground);
+}
+
+/* Never allow random Tailwind "text-white/..." to leak in light theme */
+.text-white,
+.text-white\/70,
+.text-white\/80,
+.text-white\/60 {
+  color: #ffffff !important;
+}
