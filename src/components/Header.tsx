@@ -2,60 +2,49 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
-  Car,
-  HeartPulse,
-  Briefcase,
-  Landmark,
-  FileText,
-  MessageCircle,
-  LogOut,
   Sparkles,
+  Images,
+  Wrench,
+  BadgeInfo,
+  PhoneCall,
+  MessageCircle,
   Facebook,
   Instagram,
   Music,
-  BadgeInfo,
-  PhoneCall,
+  Tag,
 } from "lucide-react";
 import LogoMktMark from "@/components/LogoMktMark";
 
-/*
- * Header component for Sparkle Legacy Insurance Brokers
+/**
+ * Header — AD Interior Design
+ * - Clear navigation (services, gallery, pricing, about, contact)
+ * - Prominent WhatsApp quote CTA + Call
+ * - Responsive mobile drawer
  *
- * Features:
- *  - Clear navigation for cover types
- *  - Prominent WhatsApp CTA
- *  - Social media buttons (Instagram, TikTok via Music icon, Facebook)
- *  - Auth-aware actions
- *  - Responsive mobile drawer
- *
- * NOTE: Dark-only theme → ThemeToggle removed completely.
+ * Note: No client portal/auth logic for this project.
  */
 
-const WHATSAPP_NUMBER = "+26772971852";
-const CLIENT_LOGIN_PATH = "/client/login";
-const CLIENT_PORTAL_PATH = "/client/dashboard";
+const WHATSAPP_NUMBER = "+267 77 807 112";
 
+// Add the REAL AD links later (do not ship Sparkle links)
 const SOCIALS = {
-  instagram: "https://www.instagram.com/sparklelegacyinsurancebrokers/",
-  tiktok: "https://www.tiktok.com/@sparklelegacyinsurancebr",
-  facebook:
-    "https://www.facebook.com/Sparkle-Legacy-Insurance-Brokers-61557773288268/",
+  instagram: "",
+  tiktok: "",
+  facebook: "",
 };
 
 const nav = [
   { label: "Home", href: "/", icon: <Sparkles size={18} /> },
-  { label: "Short-Term", href: "/c/short-term", icon: <Car size={18} /> },
-  { label: "Long-Term", href: "/c/long-term", icon: <HeartPulse size={18} /> },
-  { label: "SME Cover", href: "/c/business", icon: <Briefcase size={18} /> },
-  { label: "Retirement", href: "/c/retirement", icon: <Landmark size={18} /> },
-  { label: "Claims", href: "/claims", icon: <FileText size={18} /> },
-  { label: "Contact", href: "/contact", icon: <MessageCircle size={18} /> },
+  { label: "Services", href: "/services", icon: <Wrench size={18} /> },
+  { label: "Gallery", href: "/gallery", icon: <Images size={18} /> },
+  { label: "Pricing", href: "/pricing", icon: <Tag size={18} /> },
   { label: "About", href: "/about", icon: <BadgeInfo size={18} /> },
+  { label: "Contact", href: "/contact", icon: <MessageCircle size={18} /> },
 ];
 
 function waLink(message: string) {
@@ -64,44 +53,24 @@ function waLink(message: string) {
 }
 
 function telLink() {
-  // tel:+26772971852
   return `tel:${WHATSAPP_NUMBER.replace(/[^\d+]/g, "")}`;
 }
 
 export default function Header() {
   const pathname = usePathname();
-  const router = useRouter();
-
   const [open, setOpen] = useState(false);
-  const [authed, setAuthed] = useState(false);
-
-  useEffect(() => {
-    const hasRole = (document.cookie || "")
-      .split(";")
-      .some((c) => c.trim().startsWith("role="));
-    setAuthed(hasRole);
-  }, [pathname]);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname?.startsWith(href);
 
   const close = () => setOpen(false);
 
-  const onLogout = () => {
-    try {
-      document.cookie = `role=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
-      localStorage.removeItem("mkt_client_authed");
-    } catch {}
-    setAuthed(false);
-    router.push("/");
-  };
-
   const brand = useMemo(
     () => (
       <Link
         href="/"
         onClick={close}
-        aria-label="Sparkle Legacy Insurance Brokers — Home"
+        aria-label="AD Interior Design — Home"
         className="flex items-center gap-2.5 select-none"
         prefetch={false}
       >
@@ -110,16 +79,19 @@ export default function Header() {
         </span>
 
         <span className="text-base sm:text-lg md:text-xl font-extrabold tracking-tight text-[--foreground] whitespace-nowrap">
-          Sparkle&nbsp;Legacy
+          AD&nbsp;Interior
         </span>
 
         <span className="hidden xl:inline text-xs md:text-sm font-medium text-[--muted] whitespace-nowrap">
-          Insurance&nbsp;•&nbsp;Quotes&nbsp;•&nbsp;Claims
+          TV&nbsp;Stands&nbsp;•&nbsp;Wall&nbsp;Panels&nbsp;•&nbsp;Wardrobes&nbsp;•&nbsp;Kitchens
         </span>
       </Link>
     ),
     []
   );
+
+  const whatsappMsg =
+    "Hi AD Interior Design 👋 I’d like a quote. I’ll share my city/town, measurements, and photos of the space.";
 
   return (
     <header className="w-full z-50 bg-[--background] text-[--foreground] border-b border-[--border] overflow-x-hidden">
@@ -136,10 +108,7 @@ export default function Header() {
         {brand}
 
         {/* Desktop navigation */}
-        <nav
-          className="hidden md:flex items-center gap-1 flex-wrap"
-          aria-label="Primary"
-        >
+        <nav className="hidden md:flex items-center gap-1 flex-wrap" aria-label="Primary">
           {nav.map((item) => (
             <Link
               key={item.label}
@@ -160,78 +129,54 @@ export default function Header() {
 
         {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-3 flex-shrink-0">
-          {/* WhatsApp CTA */}
-          <a
-            href={waLink(
-              "Hi Sparkle Legacy 👋 I need help with a quote / policy / claim."
-            )}
-            className="btn btn-outline"
-            aria-label="Chat on WhatsApp"
-          >
+          <a href={waLink(whatsappMsg)} className="btn btn-primary" aria-label="WhatsApp quote">
             <MessageCircle size={18} />
-            WhatsApp
+            WhatsApp Quote
           </a>
 
-          {/* Social icons */}
+          <a href={telLink()} className="btn btn-outline" aria-label="Call AD Interior Design">
+            <PhoneCall size={18} />
+            Call
+          </a>
+
+          {/* Social icons (only render if link exists) */}
           <div className="hidden lg:flex items-center gap-2">
-            <a
-              href={SOCIALS.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
-            >
-              <Instagram size={16} />
-            </a>
+            {SOCIALS.instagram ? (
+              <a
+                href={SOCIALS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
+              >
+                <Instagram size={16} />
+              </a>
+            ) : null}
 
-            <a
-              href={SOCIALS.tiktok}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="TikTok"
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
-            >
-              <Music size={16} />
-            </a>
+            {SOCIALS.tiktok ? (
+              <a
+                href={SOCIALS.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
+              >
+                <Music size={16} />
+              </a>
+            ) : null}
 
-            <a
-              href={SOCIALS.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
-            >
-              <Facebook size={16} />
-            </a>
+            {SOCIALS.facebook ? (
+              <a
+                href={SOCIALS.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
+              >
+                <Facebook size={16} />
+              </a>
+            ) : null}
           </div>
-
-          {/* Auth actions */}
-          {!authed ? (
-            <Link
-              href={CLIENT_LOGIN_PATH}
-              className="btn btn-primary"
-              prefetch={false}
-            >
-              Client Login
-            </Link>
-          ) : (
-            <>
-              <Link
-                href={CLIENT_PORTAL_PATH}
-                className="btn btn-outline"
-                prefetch={false}
-              >
-                Dashboard
-              </Link>
-              <button
-                type="button"
-                onClick={onLogout}
-                className="btn btn-outline"
-              >
-                <LogOut size={18} /> Logout
-              </button>
-            </>
-          )}
         </div>
 
         {/* Mobile toggle */}
@@ -263,9 +208,7 @@ export default function Header() {
                 href={item.href}
                 onClick={close}
                 className={`menu-link justify-between ${
-                  isActive(item.href)
-                    ? "bg-[--surface-2] border border-[--border]"
-                    : ""
+                  isActive(item.href) ? "bg-[--surface-2] border border-[--border]" : ""
                 }`}
                 prefetch={false}
               >
@@ -279,91 +222,58 @@ export default function Header() {
 
             <div className="h-px bg-white/10 my-3" />
 
-            <a
-              href={waLink(
-                "Hi Sparkle Legacy 👋 I’d like help with a quote / policy / claim."
-              )}
-              onClick={close}
-              className="btn btn-primary w-full"
-            >
-              <MessageCircle size={18} /> WhatsApp
+            <a href={waLink(whatsappMsg)} onClick={close} className="btn btn-primary w-full">
+              <MessageCircle size={18} /> WhatsApp Quote
             </a>
 
-            <a
-              href={telLink()}
-              onClick={close}
-              className="btn btn-outline w-full"
-            >
+            <a href={telLink()} onClick={close} className="btn btn-outline w-full">
               <PhoneCall size={18} /> Call
             </a>
 
-            {!authed ? (
-              <Link
-                href={CLIENT_LOGIN_PATH}
-                onClick={close}
-                className="btn btn-outline w-full"
-                prefetch={false}
-              >
-                Client Login
-              </Link>
-            ) : (
+            {/* Mobile socials */}
+            {(SOCIALS.instagram || SOCIALS.tiktok || SOCIALS.facebook) && (
               <>
-                <Link
-                  href={CLIENT_PORTAL_PATH}
-                  onClick={close}
-                  className="btn btn-outline w-full"
-                  prefetch={false}
-                >
-                  Dashboard
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    close();
-                    onLogout();
-                  }}
-                  className="btn btn-outline w-full"
-                >
-                  <LogOut size={18} /> Logout
-                </button>
+                <div className="h-px bg-white/10 my-3" />
+                <div className="flex gap-3">
+                  {SOCIALS.instagram ? (
+                    <a
+                      href={SOCIALS.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Instagram"
+                      className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
+                    >
+                      <Instagram size={16} />
+                    </a>
+                  ) : null}
+                  {SOCIALS.tiktok ? (
+                    <a
+                      href={SOCIALS.tiktok}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="TikTok"
+                      className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
+                    >
+                      <Music size={16} />
+                    </a>
+                  ) : null}
+                  {SOCIALS.facebook ? (
+                    <a
+                      href={SOCIALS.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Facebook"
+                      className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
+                    >
+                      <Facebook size={16} />
+                    </a>
+                  ) : null}
+                </div>
               </>
             )}
 
-            <div className="h-px bg-white/10 my-3" />
-
-            {/* Mobile socials (clickable, not just icons) */}
-            <div className="flex gap-3">
-              <a
-                href={SOCIALS.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
-              >
-                <Instagram size={16} />
-              </a>
-              <a
-                href={SOCIALS.tiktok}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
-              >
-                <Music size={16} />
-              </a>
-              <a
-                href={SOCIALS.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
-              >
-                <Facebook size={16} />
-              </a>
-            </div>
-
             <div className="mt-3 text-xs text-[--muted]">
-              WhatsApp: {WHATSAPP_NUMBER}
+              WhatsApp / Call: {WHATSAPP_NUMBER}
             </div>
           </div>
         </div>

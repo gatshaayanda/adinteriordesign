@@ -5,119 +5,176 @@ import type React from "react";
 type Props = React.SVGProps<SVGSVGElement>;
 
 /**
- * Logo — Sparkle Legacy wordmark + shield mark
+ * Logo — AD Interior Design wordmark + slat/marble mark
  *
- * Combines the shield mark with a bold wordmark. The shield uses a rich
- * gradient palette and a shimmering sweep for subtle movement. The wordmark
- * reveals smoothly on load, reinforcing professionalism and trust:contentReference[oaicite:1]{index=1}.
+ * Premium interior feel:
+ * - Slat wall texture
+ * - Marble feature panel
+ * - Warm brass accent line
+ * Motion is restrained and respects prefers-reduced-motion.
  */
 export default function LogoMkt(props: Props) {
   return (
     <svg
       viewBox="0 0 360 64"
       role="img"
-      aria-label="Sparkle Legacy Insurance Brokers Logo"
+      aria-label="AD Interior Design Logo"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
       className={`logo-fade ${props.className || ""}`}
     >
       <defs>
-        {/* Brand gradient for shield and wordmark */}
-        <linearGradient id="insGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        {/* Brand gradient for wordmark + accents */}
+        <linearGradient id="adGrad" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="var(--brand-primary)" />
           <stop offset="55%" stopColor="var(--brand-secondary)" />
           <stop offset="100%" stopColor="var(--brand-accent)" />
         </linearGradient>
 
-        {/* Soft inner glow behind the shield */}
-        <radialGradient id="insGlow" cx="50%" cy="38%" r="72%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.92)" />
-          <stop offset="35%" stopColor="rgba(56,189,248,0.45)" />
-          <stop offset="70%" stopColor="rgba(29,78,216,0.28)" />
-          <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-        </radialGradient>
+        {/* Marble panel */}
+        <linearGradient id="adMarble" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#eef2f7" />
+        </linearGradient>
 
-        {/* Moving shimmer highlight */}
-        <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="0%">
+        {/* Veins */}
+        <linearGradient id="adVein" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="rgba(15,23,42,0.18)" />
+          <stop offset="50%" stopColor="rgba(201,162,106,0.22)" />
+          <stop offset="100%" stopColor="rgba(15,23,42,0.14)" />
+        </linearGradient>
+
+        {/* Shimmer sweep (very subtle) */}
+        <linearGradient id="adShine" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-          <stop offset="50%" stopColor="rgba(255,255,255,0.9)">
+          <stop offset="50%" stopColor="rgba(255,255,255,0.75)">
             <animate
               attributeName="offset"
               values="-1; 2"
-              dur="7.5s"
+              dur="8.8s"
               repeatCount="indefinite"
             />
           </stop>
           <stop offset="100%" stopColor="rgba(255,255,255,0)" />
         </linearGradient>
 
-        <mask id="shineMask">
-          <rect width="360" height="64" fill="url(#shine)" />
+        <mask id="adShineMask">
+          <rect width="360" height="64" fill="url(#adShine)" />
         </mask>
       </defs>
 
-      {/* Mark */}
-      <g transform="translate(36,32)" className="float drop-glow">
-        {/* Shield shape */}
-        <path
-          d="M0 -18c8.6 0 15.6 7 15.6 15.7 0 11.4-13 23.4-15.6 25.8-2.6-2.4-15.6-14.4-15.6-25.8C-15.6 -11-8.6 -18 0 -18Z"
-          fill="url(#insGrad)"
-          stroke="rgba(255,255,255,0.85)"
-          strokeWidth="1.6"
-        />
-        {/* Soft glow behind shield */}
-        <path
-          d="M0 -25c12.1 0 22 9.9 22 22.1 0 16.1-18.4 32.9-22 36.1-3.6-3.2-22-20-22-36.1C-22 -15.1 -12.1 -25 0 -25Z"
-          fill="url(#insGlow)"
-          opacity="0.7"
+      {/* MARK (left) */}
+      <g transform="translate(38,32)" className="float drop-glow">
+        {/* Mark base tile */}
+        <rect
+          x="-22"
+          y="-22"
+          width="44"
+          height="44"
+          rx="12"
+          fill="rgba(15,23,42,0.92)"
+          stroke="rgba(255,255,255,0.18)"
+          strokeWidth="1"
         />
 
-        {/* Shimmer sweep */}
-        <path
-          d="M0 -18c8.6 0 15.6 7 15.6 15.7 0 11.4-13 23.4-15.6 25.8-2.6-2.4-15.6-14.4-15.6-25.8C-15.6 -11-8.6 -18 0 -18Z"
-          fill="url(#shine)"
-          mask="url(#shineMask)"
-          opacity="0.28"
+        {/* Slat wall */}
+        <g opacity="0.9">
+          {Array.from({ length: 7 }).map((_, i) => {
+            const x = -16 + i * 5;
+            return (
+              <rect
+                key={i}
+                x={x}
+                y="-14"
+                width="2.2"
+                height="28"
+                rx="1.1"
+                fill="rgba(255,255,255,0.16)"
+              />
+            );
+          })}
+        </g>
+
+        {/* Marble inset */}
+        <rect
+          x="-4"
+          y="-10"
+          width="22"
+          height="20"
+          rx="5"
+          fill="url(#adMarble)"
+          stroke="rgba(255,255,255,0.20)"
+          strokeWidth="1"
         />
 
-        {/* Check mark */}
+        {/* Marble veins */}
         <path
-          d="M-7.8 2.2l3.5 3.6L8.2 -7.2"
+          d="M-2 1c4-4 7-1 10-5 3-4 6 0 9-4"
           fill="none"
-          stroke="rgba(31,41,55,0.85)"
-          strokeWidth="3"
+          stroke="url(#adVein)"
+          strokeWidth="1.1"
           strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.9"
+          opacity="0.75"
+        />
+        <path
+          d="M0 7c3-2.5 5-1.5 8-3.5 3-2 4 0 7-2"
+          fill="none"
+          stroke="url(#adVein)"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+          opacity="0.55"
+        />
+
+        {/* Brass accent line */}
+        <rect
+          x="-6"
+          y="12"
+          width="26"
+          height="2.6"
+          rx="1.3"
+          fill="url(#adGrad)"
+          opacity="0.95"
+        />
+
+        {/* Subtle shimmer sweep over the tile */}
+        <rect
+          x="-22"
+          y="-22"
+          width="44"
+          height="44"
+          rx="12"
+          fill="url(#adShine)"
+          mask="url(#adShineMask)"
+          opacity="0.14"
         />
       </g>
 
-      {/* Wordmark */}
+      {/* WORDMARK */}
       <text
         x="74"
         y="36"
-        fill="url(#insGrad)"
+        fill="url(#adGrad)"
         fontFamily="var(--font-sans)"
         fontWeight="900"
         fontSize="22"
-        letterSpacing="0.6"
+        letterSpacing="0.4"
         className="tracking-text"
       >
-        Sparkle Legacy
+        AD Interior Design
       </text>
 
-      {/* Sub-label */}
+      {/* SUB-LABEL */}
       <text
         x="74"
         y="54"
-        fill="rgba(31,41,55,0.55)"
+        fill="rgba(15,23,42,0.55)"
         fontFamily="var(--font-sans)"
         fontWeight="800"
         fontSize="10.5"
         letterSpacing="2.0"
         className="subtle"
       >
-        INSURANCE BROKERS • BOTSWANA
+        CUSTOM INTERIORS • BOTSWANA
       </text>
 
       <style jsx>{`
@@ -127,30 +184,28 @@ export default function LogoMkt(props: Props) {
             transform: translateY(0);
           }
           50% {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
           }
         }
         .float {
-          animation: float 5.2s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+          animation: float 6.2s cubic-bezier(0.45, 0, 0.25, 1) infinite;
           transform-origin: center;
         }
 
         .drop-glow {
-          filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.18))
-            drop-shadow(0 0 22px rgba(45, 212, 191, 0.14))
-            drop-shadow(0 0 26px rgba(29, 78, 216, 0.12));
+          filter: drop-shadow(0 10px 20px rgba(2, 6, 23, 0.18))
+            drop-shadow(0 0 14px rgba(201, 162, 106, 0.14));
           transition: filter 0.8s ease;
         }
         .drop-glow:hover {
-          filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.28))
-            drop-shadow(0 0 28px rgba(45, 212, 191, 0.22))
-            drop-shadow(0 0 34px rgba(29, 78, 216, 0.18));
+          filter: drop-shadow(0 14px 26px rgba(2, 6, 23, 0.22))
+            drop-shadow(0 0 18px rgba(201, 162, 106, 0.20));
         }
 
         @keyframes textReveal {
           0% {
             opacity: 0;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.10em;
             transform: translateY(6px);
           }
           100% {

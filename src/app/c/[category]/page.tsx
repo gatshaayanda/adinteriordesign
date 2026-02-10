@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -10,137 +11,92 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { firestore } from "@/utils/firebaseConfig";
 
 import {
-  ShieldCheck,
-  Sparkles,
   MessageCircle,
   FileText,
   ChevronRight,
-  Car,
-  HeartPulse,
-  Briefcase,
-  Landmark,
+  Ruler,
+  Wrench,
+  PanelsTopLeft,
+  LayoutGrid,
+  Sofa,
+  Home,
+  Sparkles,
 } from "lucide-react";
 
-const WHATSAPP_NUMBER = "+26772971852";
+const WHATSAPP_NUMBER = "+267 77 807 112";
 
 function waLink(text: string) {
   const digits = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
 
-type InsuranceCategory =
-  | "short-term"
-  | "long-term"
-  | "motor"
-  | "home"
-  | "travel"
-  | "gadget"
-  | "life"
-  | "funeral"
-  | "disability"
-  | "retirement"
-  | "business";
+type ServiceCategory =
+  | "tv-stands"
+  | "wall-panels"
+  | "wardrobes"
+  | "kitchens"
+  | "ceilings"
+  | "doors";
 
-type InsuranceProduct = {
+type ServiceItem = {
   id: string;
-  name: string;
-  category: InsuranceCategory;
+  title: string;
+  category: ServiceCategory;
   summary?: string;
   bullets?: string[];
-  whatItCovers?: string[];
-  whoItsFor?: string[];
-  keyNotes?: string[];
+  imageUrl?: string;
   active?: boolean;
   order?: number;
 };
 
-const VALID_CATEGORIES: InsuranceCategory[] = [
-  "short-term",
-  "long-term",
-  "motor",
-  "home",
-  "travel",
-  "gadget",
-  "life",
-  "funeral",
-  "disability",
-  "retirement",
-  "business",
+const VALID_CATEGORIES: ServiceCategory[] = [
+  "tv-stands",
+  "wall-panels",
+  "wardrobes",
+  "kitchens",
+  "ceilings",
+  "doors",
 ];
 
 const CATEGORY_META: Record<
-  InsuranceCategory,
+  ServiceCategory,
   { title: string; subtitle: string; icon: ReactNode; ctaLabel: string }
 > = {
-  "short-term": {
-    title: "Short-Term Insurance",
-    subtitle:
-      "Covers things: car, home, travel, gadgets. Usually monthly/yearly renewal.",
-    icon: <ShieldCheck size={18} />,
-    ctaLabel: "Request a Short-Term Quote",
+  "tv-stands": {
+    title: "TV Stands & Wall Units",
+    subtitle: "Modern wall units, floating designs, storage & LED options.",
+    icon: <LayoutGrid size={18} />,
+    ctaLabel: "Request a TV Stand Quote",
   },
-  "long-term": {
-    title: "Long-Term Insurance",
-    subtitle:
-      "Covers people/income: life, funeral, disability, dread disease, annuities.",
+  "wall-panels": {
+    title: "Wall Panels (Slats / Marble)",
+    subtitle: "Feature walls with clean finishes that transform the room.",
+    icon: <PanelsTopLeft size={18} />,
+    ctaLabel: "Request a Wall Panel Quote",
+  },
+  wardrobes: {
+    title: "Wardrobes & Closets",
+    subtitle: "Custom storage layouts, sliding or hinged, premium finishes.",
+    icon: <Sofa size={18} />,
+    ctaLabel: "Request a Wardrobe Quote",
+  },
+  kitchens: {
+    title: "Kitchens & Cabinets",
+    subtitle: "Practical layouts, strong finishes, built for daily use.",
+    icon: <Home size={18} />,
+    ctaLabel: "Request a Kitchen Quote",
+  },
+  ceilings: {
+    title: "Ceilings & Bulkheads",
+    subtitle: "Neat ceilings, bulkheads, lighting-ready finishes.",
     icon: <Sparkles size={18} />,
-    ctaLabel: "Request a Long-Term Quote",
+    ctaLabel: "Request a Ceiling Quote",
   },
-  motor: {
-    title: "Motor Insurance",
-    subtitle: "Third party / comprehensive cover for vehicles.",
-    icon: <Car size={18} />,
-    ctaLabel: "Request Motor Quote",
-  },
-  home: {
-    title: "Home & Contents",
-    subtitle: "Protect your house and belongings against loss/damage.",
-    icon: <ShieldCheck size={18} />,
-    ctaLabel: "Request Home Quote",
-  },
-  travel: {
-    title: "Travel Insurance",
-    subtitle: "Medical, cancellations, baggage and travel disruptions.",
-    icon: <ShieldCheck size={18} />,
-    ctaLabel: "Request Travel Quote",
-  },
-  gadget: {
-    title: "Gadget Insurance",
-    subtitle:
-      "Cover for phones/laptops against theft or accidental damage (product-dependent).",
-    icon: <ShieldCheck size={18} />,
-    ctaLabel: "Request Gadget Quote",
-  },
-  life: {
-    title: "Life Cover",
-    subtitle: "Financial protection for your family if you pass away.",
-    icon: <HeartPulse size={18} />,
-    ctaLabel: "Request Life Quote",
-  },
-  funeral: {
-    title: "Funeral Cover",
-    subtitle: "Cash benefit to support funeral costs when a covered member passes.",
+  doors: {
+    title: "Doors & Finishes",
+    subtitle: "Interior finishes and clean door solutions for a polished look.",
     icon: <Sparkles size={18} />,
-    ctaLabel: "Request Funeral Quote",
-  },
-  disability: {
-    title: "Disability & Income Protection",
-    subtitle:
-      "Support if illness/injury affects your ability to work (policy-dependent).",
-    icon: <Sparkles size={18} />,
-    ctaLabel: "Request Disability Quote",
-  },
-  retirement: {
-    title: "Retirement & Annuities",
-    subtitle: "Build savings or secure an income stream for retirement.",
-    icon: <Landmark size={18} />,
-    ctaLabel: "Request Retirement Quote",
-  },
-  business: {
-    title: "Business & SME Cover",
-    subtitle: "Protect assets, liability, fleet, and business continuity.",
-    icon: <Briefcase size={18} />,
-    ctaLabel: "Request Business Quote",
+    ctaLabel: "Request a Door Quote",
   },
 };
 
@@ -148,13 +104,13 @@ export default function CategoryPage() {
   const params = useParams<{ category: string }>();
   const raw = (params?.category || "").toLowerCase();
 
-  const category = (VALID_CATEGORIES.includes(raw as InsuranceCategory)
-    ? (raw as InsuranceCategory)
-    : "short-term") as InsuranceCategory;
+  const category = (VALID_CATEGORIES.includes(raw as ServiceCategory)
+    ? (raw as ServiceCategory)
+    : "tv-stands") as ServiceCategory;
 
   const meta = useMemo(() => CATEGORY_META[category], [category]);
 
-  const [items, setItems] = useState<InsuranceProduct[]>([]);
+  const [items, setItems] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -164,9 +120,9 @@ export default function CategoryPage() {
       try {
         setLoading(true);
 
-        // ✅ no orderBy → no composite index required
+        // ✅ Fetch services by category (no orderBy → no composite index)
         const qRef = query(
-          collection(firestore, "insurance_products"),
+          collection(firestore, "services"),
           where("category", "==", category)
         );
 
@@ -174,15 +130,15 @@ export default function CategoryPage() {
         const data = snap.docs.map((d) => ({
           id: d.id,
           ...(d.data() as any),
-        })) as InsuranceProduct[];
+        })) as ServiceItem[];
 
         const cleaned = data
-          .filter((p) => p.active !== false)
+          .filter((s) => s.active !== false)
           .sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 
         if (alive) setItems(cleaned);
       } catch (e) {
-        console.error("Load category insurance products failed:", e);
+        console.error("Load services failed:", e);
         if (alive) setItems([]);
       } finally {
         if (alive) setLoading(false);
@@ -196,7 +152,7 @@ export default function CategoryPage() {
 
   const defaultQuoteMsg = useMemo(() => {
     return [
-      "Hi Sparkle Legacy 👋",
+      "Hi AD Interior Design 👋",
       `I’d like a quote for: ${meta.title}`,
       "",
       "My details:",
@@ -204,7 +160,11 @@ export default function CategoryPage() {
       "Phone: ",
       "City/Town: ",
       "",
-      "Notes (optional): ",
+      "Measurements (W×H): ",
+      "Finish (slats/marble/wood/gloss/matte): ",
+      "Notes: ",
+      "",
+      "I will send photos/video of the space.",
     ].join("\n");
   }, [meta.title]);
 
@@ -217,7 +177,7 @@ export default function CategoryPage() {
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[--border] bg-[--surface] text-xs">
                 <span className="text-[--brand-primary]">{meta.icon}</span>
-                <span className="text-[--muted]">Sparkle Legacy • Insurance Brokers</span>
+                <span className="text-[--muted]">AD Interior Design • Botswana</span>
               </div>
 
               <h1 className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight">
@@ -227,36 +187,20 @@ export default function CategoryPage() {
 
               {/* Sub-nav (quick switching) */}
               <div className="mt-5 flex flex-wrap gap-2">
-                <Link
-                  href="/c/short-term"
-                  prefetch={false}
-                  className={`menu-link ${
-                    category === "short-term"
-                      ? "bg-[--surface-2] border border-[--border] text-[--foreground]"
-                      : ""
-                  }`}
-                >
-                  Short-Term
+                <Link href="/c/tv-stands" prefetch={false} className="menu-link">
+                  TV Stands
                 </Link>
-                <Link
-                  href="/c/long-term"
-                  prefetch={false}
-                  className={`menu-link ${
-                    category === "long-term"
-                      ? "bg-[--surface-2] border border-[--border] text-[--foreground]"
-                      : ""
-                  }`}
-                >
-                  Long-Term
+                <Link href="/c/wall-panels" prefetch={false} className="menu-link">
+                  Wall Panels
                 </Link>
-                <Link href="/c/business" prefetch={false} className="menu-link">
-                  SME Cover
+                <Link href="/c/wardrobes" prefetch={false} className="menu-link">
+                  Wardrobes
                 </Link>
-                <Link href="/c/retirement" prefetch={false} className="menu-link">
-                  Retirement
+                <Link href="/c/kitchens" prefetch={false} className="menu-link">
+                  Kitchens
                 </Link>
-                <Link href="/claims" prefetch={false} className="menu-link">
-                  Claims
+                <Link href="/gallery" prefetch={false} className="menu-link">
+                  Gallery
                 </Link>
                 <Link href="/contact" prefetch={false} className="menu-link">
                   Contact
@@ -282,15 +226,15 @@ export default function CategoryPage() {
             </div>
           </div>
 
-          {/* Small helper card */}
+          {/* Helper card */}
           <div className="mt-8 rounded-2xl border border-[--border] bg-[--surface] p-5">
             <div className="font-semibold flex items-center gap-2">
-              <ShieldCheck size={16} className="text-[--brand-primary]" />
+              <Ruler size={16} className="text-[--brand-primary]" />
               What to send for a fast quote
             </div>
             <p className="text-sm text-[--muted] mt-2 leading-relaxed">
-              Share the product, your city/town, and key details (example: car model + registration,
-              sum assured, dependants, or any special notes). If you’re unsure, just describe your situation.
+              Send your <b>city/town</b>, <b>measurements (W×H)</b>, preferred <b>finish</b>,
+              and a <b>photo/video</b> of the wall/space. If you’re unsure, just describe the room and we’ll guide you.
             </p>
           </div>
         </div>
@@ -305,9 +249,9 @@ export default function CategoryPage() {
                 key={idx}
                 className="rounded-2xl border border-[--border] bg-[--surface] p-5 animate-pulse"
               >
-                <div className="h-4 w-2/3 rounded bg-black/10 dark:bg-white/10" />
+                <div className="h-36 rounded-xl bg-black/10 dark:bg-white/10" />
+                <div className="h-4 w-2/3 mt-4 rounded bg-black/10 dark:bg-white/10" />
                 <div className="h-3 w-full mt-3 rounded bg-black/10 dark:bg-white/10" />
-                <div className="h-3 w-5/6 mt-2 rounded bg-black/10 dark:bg-white/10" />
                 <div className="h-10 w-full mt-5 rounded bg-black/10 dark:bg-white/10" />
               </div>
             ))}
@@ -316,7 +260,7 @@ export default function CategoryPage() {
           <div className="rounded-2xl border border-[--border] bg-[--surface] p-8 text-center">
             <div className="text-lg font-semibold">No items listed here yet</div>
             <p className="text-[--muted] mt-2">
-              You can still request a quote — we’ll guide you with the right cover.
+              You can still request a quote — we’ll guide measurements and finish options.
             </p>
 
             <div className="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
@@ -337,10 +281,10 @@ export default function CategoryPage() {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((p) => {
+            {items.map((s) => {
               const msg = [
-                "Hi Sparkle Legacy 👋",
-                `I’d like a quote for: ${p.name}`,
+                "Hi AD Interior Design 👋",
+                `I’d like a quote for: ${s.title}`,
                 `Category: ${meta.title}`,
                 "",
                 "My details:",
@@ -348,21 +292,33 @@ export default function CategoryPage() {
                 "Phone: ",
                 "City/Town: ",
                 "",
-                "Notes (optional): ",
+                "Measurements (W×H): ",
+                "Finish (slats/marble/wood/gloss/matte): ",
+                "Notes: ",
+                "",
+                "I will send photos/video of the space.",
               ].join("\n");
 
               return (
                 <div
-                  key={p.id}
+                  key={s.id}
                   className="rounded-2xl border border-[--border] bg-[--surface] overflow-hidden hover:bg-[--surface-2] transition"
                 >
+                  <div className="relative h-40">
+                    {s.imageUrl ? (
+                      <Image src={s.imageUrl} alt={s.title} fill className="object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 bg-[--surface-2]" />
+                    )}
+                  </div>
+
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="font-semibold text-base">{p.name}</div>
-                        {p.summary ? (
+                        <div className="font-semibold text-base">{s.title}</div>
+                        {s.summary ? (
                           <p className="text-sm text-[--muted] mt-2 leading-relaxed">
-                            {p.summary}
+                            {s.summary}
                           </p>
                         ) : null}
                       </div>
@@ -372,9 +328,9 @@ export default function CategoryPage() {
                       </div>
                     </div>
 
-                    {!!p.bullets?.length && (
+                    {!!s.bullets?.length && (
                       <ul className="mt-4 space-y-2 text-sm text-[--muted]">
-                        {p.bullets.slice(0, 4).map((b, idx) => (
+                        {s.bullets.slice(0, 4).map((b, idx) => (
                           <li key={idx} className="flex gap-2">
                             <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-black/30 dark:bg-white/30" />
                             <span className="leading-relaxed">{b}</span>
@@ -399,8 +355,8 @@ export default function CategoryPage() {
                       </Link>
                     </div>
 
-                    <p className="text-xs text-[--muted] mt-4">
-                      Tip: include key details (car model/registration, sum assured, dependants).
+                    <p className="text-xs text-[--muted] mt-4 inline-flex items-center gap-2">
+                      <Wrench size={14} /> Tip: send measurements + photos/video for fastest pricing.
                     </p>
                   </div>
                 </div>

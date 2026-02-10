@@ -1,33 +1,36 @@
 @import "tailwindcss";
 
 /* =========================================================
-   Sparkle Legacy — Global Styles (Dark-only / Professional)
-   - Default is DARK from first paint (no toggles)
-   - Readability, clarity, subtle motion
+   AD Interior Design — Global Styles (Light / Premium / Clean)
+   - Default is LIGHT from first paint (no theme toggles)
+   - Inspired by: slat walls, marble panels, gloss cabinetry, warm LEDs
    ========================================================= */
 
 :root {
   /* Base */
-  --background: #0f172a;         /* very dark navy */
-  --foreground: #f8fafc;         /* soft off-white */
+  --background: #f8fafc;         /* clean off-white */
+  --foreground: #0f172a;         /* deep navy-charcoal text */
 
   /* Surfaces */
-  --surface: #111827;
-  --surface-2: #1e293b;
-  --border: rgba(255, 255, 255, 0.12);
+  --surface: #ffffff;            /* cards */
+  --surface-2: #f1f5f9;          /* subtle section bg */
+  --border: rgba(15, 23, 42, 0.10);
 
-  /* Brand palette */
-  --brand-primary: #60a5fa;
-  --brand-secondary: #38bdf8;
-  --brand-accent: #fbbf24;
+  /* Brand palette (AD Interior) */
+  --brand-primary: #0f172a;      /* charcoal */
+  --brand-secondary: #334155;    /* slate */
+  --brand-accent: #c9a26a;       /* brass / warm gold */
+  --brand-wood: #b07a4a;         /* warm wood hint */
+  --brand-led: rgba(255, 193, 7, 0.35); /* warm LED glow */
 
   /* Text */
-  --muted: rgba(248, 250, 252, 0.80);
-  --muted-2: rgba(248, 250, 252, 0.60);
+  --muted: rgba(15, 23, 42, 0.75);
+  --muted-2: rgba(15, 23, 42, 0.55);
 
   /* Effects */
-  --ring: rgba(96, 165, 250, 0.30);
-  --shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+  --ring: rgba(201, 162, 106, 0.35);
+  --shadow: 0 18px 50px rgba(2, 6, 23, 0.10);
+  --shadow-2: 0 10px 30px rgba(2, 6, 23, 0.12);
 
   /* Fonts */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
@@ -37,18 +40,13 @@
     "Liberation Mono", "Courier New", monospace;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 html {
-  /* Force native controls to dark styling too */
-  color-scheme: dark;
+  /* Light styling for native controls */
+  color-scheme: light;
 }
 
 body {
@@ -63,8 +61,7 @@ body {
 }
 
 /* Make media behave */
-img,
-video {
+img, video {
   max-width: 100%;
   height: auto;
   display: block;
@@ -78,6 +75,14 @@ video {
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 1rem;
+}
+
+.section {
+  padding: 4rem 0;
+}
+
+.section-muted {
+  background: var(--surface-2);
 }
 
 /* =========================================================
@@ -96,10 +101,7 @@ p {
   color: var(--muted);
 }
 
-small,
-.muted {
-  color: var(--muted-2);
-}
+small, .muted { color: var(--muted-2); }
 
 /* =========================================================
    Links
@@ -111,8 +113,7 @@ a {
   transition: opacity 0.2s ease, color 0.2s ease;
 }
 
-a:hover,
-a:focus {
+a:hover, a:focus {
   opacity: 0.92;
   outline: none;
 }
@@ -121,18 +122,23 @@ a:focus {
    Components (utility classes)
    ========================================================= */
 
-/* Cards */
+/* Card */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 1rem;
   box-shadow: var(--shadow);
-  backdrop-filter: blur(6px);
 }
 
-/* Padding wrapper for cards */
-.card-inner {
-  padding: 1rem;
+.card-inner { padding: 1rem; }
+
+/* Premium glass card (optional for hero overlays) */
+.card-glass {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-2);
+  backdrop-filter: blur(10px);
 }
 
 /* Buttons */
@@ -142,8 +148,8 @@ a:focus {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.7rem 1.05rem;
-  border-radius: 0.85rem;
-  font-weight: 700;
+  border-radius: 0.9rem;
+  font-weight: 800;
   font-family: var(--font-sans);
   cursor: pointer;
   border: 1px solid transparent;
@@ -152,53 +158,58 @@ a:focus {
   user-select: none;
 }
 
-.btn:active {
-  transform: translateY(1px);
-}
+.btn:active { transform: translateY(1px); }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
-  color: #0b1220;
-  box-shadow: 0 12px 24px rgba(96, 165, 250, 0.18);
+  color: #ffffff;
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.22);
 }
 
-.btn-primary:hover,
-.btn-primary:focus {
-  opacity: 0.97;
+.btn-primary:hover, .btn-primary:focus { opacity: 0.97; }
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--brand-accent), #e7c58d);
+  color: #111827;
+  box-shadow: 0 14px 26px rgba(201, 162, 106, 0.25);
 }
 
 .btn-outline {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.04);
   border-color: var(--border);
   color: var(--foreground);
 }
 
-.btn-outline:hover,
-.btn-outline:focus {
-  background: rgba(255, 255, 255, 0.07);
+.btn-outline:hover, .btn-outline:focus {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+/* WhatsApp button */
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: #04110b;
+  box-shadow: 0 14px 26px rgba(18, 140, 126, 0.22);
 }
 
 /* Inputs */
 .input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.03);
   color: var(--foreground);
   border: 1px solid var(--border);
-  border-radius: 0.85rem;
+  border-radius: 0.9rem;
   padding: 0.85rem 0.95rem;
   font-size: 1rem;
   transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.input::placeholder {
-  color: var(--muted-2);
-}
+.input::placeholder { color: var(--muted-2); }
 
 .input:focus {
   outline: none;
-  border-color: var(--brand-primary);
+  border-color: var(--brand-accent);
   box-shadow: 0 0 0 4px var(--ring);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(15, 23, 42, 0.04);
 }
 
 /* Badge */
@@ -209,10 +220,24 @@ a:focus {
   padding: 0.28rem 0.65rem;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: rgba(96, 165, 250, 0.10);
-  color: var(--muted);
+  background: rgba(201, 162, 106, 0.12);
+  color: rgba(15, 23, 42, 0.78);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 800;
+}
+
+/* Price badge (like your images: P14500 etc.) */
+.price-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.85rem;
+  background: rgba(2, 6, 23, 0.72);
+  color: #ffffff;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  box-shadow: 0 14px 28px rgba(2, 6, 23, 0.25);
 }
 
 /* Menu links */
@@ -221,40 +246,81 @@ a:focus {
   align-items: center;
   gap: 0.5rem;
   padding: 0.55rem 0.85rem;
-  border-radius: 0.85rem;
+  border-radius: 0.9rem;
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 800;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   border: 1px solid transparent;
 }
 
-.menu-link:hover,
-.menu-link:focus {
+.menu-link:hover, .menu-link:focus {
   color: var(--foreground);
-  background: rgba(96, 165, 250, 0.12);
-  border-color: rgba(255, 255, 255, 0.10);
+  background: rgba(15, 23, 42, 0.05);
+  border-color: rgba(15, 23, 42, 0.10);
   outline: none;
 }
 
 /* =========================================================
-   Optional: selection, scrollbar, reduced motion
+   AD-specific visual helpers (slats / marble / LED glow)
    ========================================================= */
 
-::selection {
-  background: rgba(96, 165, 250, 0.22);
+/* Slat wall background (CSS-only texture) */
+.slat-wall {
+  position: relative;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #111827 0px,
+      #111827 10px,
+      #0b1220 10px,
+      #0b1220 16px
+    );
 }
 
-::-webkit-scrollbar {
-  width: 10px;
+/* Warm wood slats variation */
+.slat-wall-wood {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #8b5a2b 0px,
+      #8b5a2b 10px,
+      #6f441f 10px,
+      #6f441f 16px
+    );
 }
+
+/* Marble panel surface */
+.marble-panel {
+  background:
+    radial-gradient(1200px 500px at 20% 10%, rgba(15, 23, 42, 0.05), transparent 60%),
+    linear-gradient(135deg, #ffffff, #f3f4f6);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+/* LED underglow */
+.led-glow {
+  box-shadow: 0 18px 55px var(--brand-led);
+}
+
+/* =========================================================
+   Selection, scrollbar, reduced motion
+   ========================================================= */
+
+::selection { background: rgba(201, 162, 106, 0.22); }
+
+::-webkit-scrollbar { width: 10px; }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(15, 23, 42, 0.18);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.20);
+  background: rgba(15, 23, 42, 0.26);
 }
 
 @media (prefers-reduced-motion: reduce) {

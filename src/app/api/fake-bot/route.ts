@@ -3,34 +3,37 @@ import { NextResponse } from "next/server";
 type BotResponse = { reply: string; suggestions?: string[] };
 
 const CONTACT = {
-  whatsappNumber: "+26772971852",
+  whatsappNumber: "+267 77 807 112",
 };
 
+// Put the REAL AD links here later (do NOT ship wrong socials)
 const SOCIALS = {
-  instagram: "https://www.instagram.com/p/DUTTKQjCCG6/",
-  tiktok: "https://www.tiktok.com/@sparklelegacyinsurancebr/video/7568941327816068364",
-  facebook: "https://www.facebook.com/p/Sparkle-Legacy-Insurance-Brokers-61557773288268/",
+  instagram: "",
+  tiktok: "",
+  facebook: "",
 };
 
 const PATHS = {
-  shortTerm: "/c/short-term",
-  longTerm: "/c/long-term",
-  retirement: "/c/retirement",
-  business: "/c/business",
-  claims: "/claims",
+  services: "/services",
+  gallery: "/gallery",
   contact: "/contact",
 };
 
 const SUGG = {
   GET_QUOTE: "Get a quote",
-  SHORT: "Short-Term cover",
-  LONG: "Long-Term cover",
-  RETIRE: "Retirement",
-  SME: "SME cover",
-  CLAIMS: "Claims help",
+  TV_STAND: "TV Stand / Wall Unit",
+  PANELS: "Wall Panels",
+  WARDROBES: "Wardrobes",
+  KITCHEN: "Kitchen",
+  PRICING: "Pricing / Estimate",
+  MEASUREMENTS: "What measurements do you need?",
+  TIMELINE: "How long does it take?",
   WHATSAPP: "Talk on WhatsApp",
+  GALLERY: "See Gallery",
   CONTACT: "Contact",
-  DOCS: "What documents are needed?",
+  MATERIALS: "Finishes & materials",
+  LOCATION: "Where are you based?",
+  SOCIALS: "Social links",
 } as const;
 
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -53,36 +56,51 @@ const includesAny = (s: string, pats: (string | RegExp)[]) =>
 // Small in-memory context (server-side only; resets on cold start)
 let memory: { greeted?: boolean; lastIntent?: string } = {};
 
-// Phrase pools (Sparkle Legacy tone)
 const tone = {
   greet: [
-    "Hi 👋 You’re chatting with Sparkle Legacy.",
-    "Hello 👋 Sparkle Legacy here — how can I help?",
-    "Welcome 👋 I can help you understand cover, request a quote, or guide you on claims.",
-  ],
-  clarify: [
-    "Quick one — is this for **Short-Term** (car/home/contents) or **Long-Term** (life/funeral/disability)?",
-    "To guide you properly: do you need cover for a **thing** (car/home) or a **person/income** (life/funeral/disability)?",
+    "Hi 👋 You’re chatting with AD Interior Design.",
+    "Hello 👋 AD Interior Design here — what are you looking to build?",
+    "Welcome 👋 I can help you get a quote fast (TV stands, wall panels, wardrobes, kitchens).",
   ],
   quote: [
-    "I can help you request a quote. Tell me: **product**, **city/town**, and key details (e.g. car model, sum assured, dependants).",
-    "For a quote, share: **cover type + product + city/town + notes**. If you prefer, tap “Talk on WhatsApp” and the site will format it neatly.",
+    "I can help you get an estimate. Tell me: **project type**, **city/town**, and **rough measurements**.",
+    "For a quote, share: **what you want**, **space**, **city/town**, and any **photos/inspo**.",
   ],
-  claims: [
-    "For claims, tell me what happened and when — I’ll guide you on the usual steps and what documents are needed.",
-    "No stress — for claims, we’ll start with: **incident date**, **what happened**, and **supporting evidence** (photos/forms).",
+  measurements: [
+    "For a quick quote, send:\n• **Wall width & height** (or the area)\n• **TV size** (if TV stand)\n• Any **plug points / sockets** location\n• Photos/video of the space\n• Finish: **slats / marble / gloss / matte / wood tone**",
+    "Measurements that help most:\n• Width × height of the wall/space\n• TV size + soundbar (if any)\n• Preferred storage (drawers / floating)\n• Finish choice (slats/marble/wood)\n• Photos/video of the space",
   ],
-  docs: [
-    "It depends on the product, but commonly: **ID**, **policy/quote reference** (if any), and **supporting documents** (forms/photos/medical/repair quotes). Tell me the product and I’ll be specific.",
-    "Usually you’ll need: **ID + completed forms + supporting evidence**. Tell me the cover type (motor/home/funeral/life) and I’ll list the exact items.",
+  timeline: [
+    "Timeline depends on the design + workload. If you tell me your **project type** and **city**, I can give a realistic estimate.",
+    "Most builds depend on materials + design complexity. Share what you need and when you need it, and we’ll advise the earliest slot.",
+  ],
+  materials: [
+    "We can do premium finishes like **slat panels**, **marble panels**, **floating units**, and clean **LED underglow** looks. Tell me the style you want and I’ll guide you.",
+    "Finishes can be **gloss** or **matte**, wood tones, slats, marble panels, and custom storage layouts. Share a reference photo and we’ll match the vibe.",
+  ],
+  location: [
+    "We’re based in Botswana. Tell me your **city/town** and we’ll advise on delivery/installation.",
+    "Share your **city/town** and we’ll confirm availability for install.",
+  ],
+  pricing: [
+    "Pricing depends on size + finish + storage + installation. The fastest way is: share measurements + a photo, and we’ll quote.",
+    "To estimate, I need: **wall size**, **project type**, and your preferred finish (slats/marble/gloss/matte).",
+  ],
+  contact: [
+    `Fastest way: WhatsApp us here: ${CONTACT.whatsappNumber}`,
+    `You can WhatsApp for a quote: ${CONTACT.whatsappNumber}`,
   ],
   socials: [
-    `Here are Sparkle Legacy’s socials:\n• Instagram: ${SOCIALS.instagram}\n• TikTok: ${SOCIALS.tiktok}\n• Facebook: ${SOCIALS.facebook}`,
-    `You can follow Sparkle Legacy here:\n• Instagram: ${SOCIALS.instagram}\n• TikTok: ${SOCIALS.tiktok}\n• Facebook: ${SOCIALS.facebook}`,
+    "Social links will be added here. For now, the fastest contact is WhatsApp.",
+    "We’ll add the official social links on the site shortly. Use WhatsApp for immediate help.",
+  ],
+  fallback: [
+    "Tell me what you want to build: **TV stand**, **wall panels**, **wardrobes**, or a **kitchen** — and your city/town.",
+    `For the fastest response, WhatsApp us: ${CONTACT.whatsappNumber}`,
+    "If you share a photo/video of the space + rough measurements, I can format a clean quote request for WhatsApp.",
   ],
 };
 
-// Intents
 type Intent = {
   name: string;
   weight: number;
@@ -96,137 +114,118 @@ const INTENTS: Intent[] = [
     weight: 4,
     matchers: [
       /\b(hello|hi|hey|morning|afternoon|evening|start|help|menu)\b/,
-      /\b(hola|dumela)\b/,
+      /\b(dumela|thobela)\b/,
     ],
     respond: () => {
       memory.greeted = true;
-      return reply(`${pick(tone.greet)}\nWhat do you need today?`, [
+      return reply(`${pick(tone.greet)}\n\nChoose one:`, [
         SUGG.GET_QUOTE,
-        SUGG.SHORT,
-        SUGG.LONG,
-        SUGG.CLAIMS,
+        SUGG.TV_STAND,
+        SUGG.PANELS,
+        SUGG.WARDROBES,
+        SUGG.KITCHEN,
         SUGG.WHATSAPP,
       ]);
     },
   },
 
   {
-    name: "socials",
+    name: "services",
     weight: 4,
     matchers: [
-      /\b(instagram|ig)\b/,
-      /\b(tiktok|tik tok)\b/,
-      /\b(facebook|fb)\b/,
-      /\b(social|socials|links|pages)\b/,
+      /\b(service|services|what do you do|do you do|build|make|carpentry|interior)\b/,
+      /\b(tv stand|tv unit|wall unit|slat|slats|wall panel|panels|marble|wardrobe|closet|kitchen|cabinet|cupboard)\b/,
     ],
     respond: () =>
-      reply(pick(tone.socials), [
-        SUGG.GET_QUOTE,
-        SUGG.SHORT,
-        SUGG.LONG,
-        SUGG.WHATSAPP,
-      ]),
+      reply(
+        `We do custom interior builds such as:\n• TV stands / wall units\n• Slat wall panels & marble feature walls\n• Wardrobes / closets\n• Kitchens & cabinets\n\nYou can also browse:\n• Services: ${PATHS.services}\n• Gallery: ${PATHS.gallery}\n\nWhat are you interested in?`,
+        [SUGG.GET_QUOTE, SUGG.GALLERY, SUGG.MEASUREMENTS, SUGG.WHATSAPP]
+      ),
   },
 
   {
     name: "quote",
-    weight: 3,
-    matchers: [/\b(quote|quotation|price|premium|how much|cost)\b/, /\b(cover|insurance)\b/],
+    weight: 4,
+    matchers: [/\b(quote|quotation|price|pricing|how much|cost|estimate|budget)\b/],
     respond: () =>
       reply(
-        `${pick(tone.quote)}\nBrowse:\n• Short-Term: ${PATHS.shortTerm}\n• Long-Term: ${PATHS.longTerm}`,
-        [SUGG.GET_QUOTE, SUGG.SHORT, SUGG.LONG, SUGG.WHATSAPP, SUGG.DOCS]
+        `${pick(tone.quote)}\n\nIf you want, I can guide you on measurements first.`,
+        [SUGG.MEASUREMENTS, SUGG.GET_QUOTE, SUGG.WHATSAPP, SUGG.GALLERY]
       ),
   },
 
   {
-    name: "short_term",
+    name: "measurements",
+    weight: 4,
+    matchers: [/\b(measure|measurement|size|sizes|dimensions|width|height|cm|mm|meter|metre)\b/],
+    respond: () =>
+      reply(pick(tone.measurements), [SUGG.GET_QUOTE, SUGG.WHATSAPP, SUGG.GALLERY]),
+  },
+
+  {
+    name: "timeline",
     weight: 3,
-    matchers: [
-      /\b(short[-\s]?term|motor|car|vehicle|third party|comprehensive|home|house|contents|travel|gadget|phone|liability)\b/,
-    ],
+    matchers: [/\b(when|how long|timeline|duration|days|weeks|availability|available)\b/],
+    respond: () =>
+      reply(pick(tone.timeline), [SUGG.GET_QUOTE, SUGG.WHATSAPP, SUGG.CONTACT]),
+  },
+
+  {
+    name: "materials",
+    weight: 3,
+    matchers: [/\b(material|materials|finish|finishes|color|colour|gloss|matte|wood|slat|marble|led)\b/],
+    respond: () =>
+      reply(pick(tone.materials), [SUGG.GET_QUOTE, SUGG.GALLERY, SUGG.WHATSAPP]),
+  },
+
+  {
+    name: "location",
+    weight: 3,
+    matchers: [/\b(where|location|based|gaborone|mogoditshane|town|city|area)\b/],
+    respond: () =>
+      reply(pick(tone.location), [SUGG.GET_QUOTE, SUGG.WHATSAPP, SUGG.CONTACT]),
+  },
+
+  {
+    name: "gallery",
+    weight: 3,
+    matchers: [/\b(gallery|photos|portfolio|examples|work|projects|images|pictures)\b/],
     respond: () =>
       reply(
-        `Short-Term insurance covers **things** (car, home & contents, travel, gadgets).\nBrowse here: ${PATHS.shortTerm}\nWhat product do you need a quote for?`,
-        [SUGG.GET_QUOTE, SUGG.CLAIMS, SUGG.DOCS, SUGG.WHATSAPP]
+        `You can browse our work here: ${PATHS.gallery}\n\nIf you tell me what style you like (slats/marble/wood), I can suggest a direction.`,
+        [SUGG.GALLERY, SUGG.TV_STAND, SUGG.PANELS, SUGG.WHATSAPP]
       ),
   },
 
   {
-    name: "long_term",
-    weight: 3,
-    matchers: [
-      /\b(long[-\s]?term|life|funeral|dread|critical illness|disability|income|credit life|endowment|annuity)\b/,
-    ],
-    respond: () =>
-      reply(
-        `Long-Term insurance covers **people/income** (life, funeral, disability, dread disease, annuities).\nBrowse here: ${PATHS.longTerm}\nWhich product are you looking for?`,
-        [SUGG.GET_QUOTE, SUGG.RETIRE, SUGG.DOCS, SUGG.WHATSAPP]
-      ),
-  },
-
-  {
-    name: "retirement",
+    name: "socials",
     weight: 2,
-    matchers: [/\b(retirement|pension|annuity|wealth|investment)\b/],
-    respond: () =>
-      reply(
-        `Retirement & wealth planning helps you build long-term security (pensions/annuities).\nBrowse here: ${PATHS.retirement}\nDo you want a savings plan or an income plan?`,
-        [SUGG.RETIRE, SUGG.GET_QUOTE, SUGG.WHATSAPP, SUGG.DOCS]
-      ),
-  },
-
-  {
-    name: "business",
-    weight: 2,
-    matchers: [/\b(business|sme|company|office|commercial|fleet)\b/],
-    respond: () =>
-      reply(
-        `For businesses/SMEs, we can help with covers like assets, liability, fleet, and employee benefits.\nBrowse here: ${PATHS.business}\nWhat industry and what do you need protected?`,
-        [SUGG.SME, SUGG.GET_QUOTE, SUGG.WHATSAPP, SUGG.DOCS]
-      ),
-  },
-
-  {
-    name: "claims",
-    weight: 3,
-    matchers: [/\b(claim|claims|accident|stolen|theft|damage|lost|injury)\b/],
-    respond: () =>
-      reply(
-        `${pick(tone.claims)}\nClaims page: ${PATHS.claims}\nWhat product is it (motor/home/funeral/life) and what happened?`,
-        [SUGG.CLAIMS, SUGG.DOCS, SUGG.WHATSAPP, SUGG.CONTACT]
-      ),
-  },
-
-  {
-    name: "documents",
-    weight: 2,
-    matchers: [/\b(document|documents|requirements|needed|need|form|forms|id|papers)\b/],
-    respond: () =>
-      reply(pick(tone.docs), [SUGG.DOCS, SUGG.GET_QUOTE, SUGG.CLAIMS, SUGG.WHATSAPP]),
+    matchers: [/\b(instagram|ig|tiktok|tik tok|facebook|fb|social|socials|links|pages)\b/],
+    respond: () => reply(pick(tone.socials), [SUGG.WHATSAPP, SUGG.CONTACT, SUGG.GALLERY]),
   },
 
   {
     name: "contact",
-    weight: 2,
-    matchers: [/\b(contact|call|phone|whatsapp|talk|agent|advisor|help me)\b/],
+    weight: 4,
+    matchers: [/\b(contact|call|phone|whatsapp|wa|chat|talk|help me)\b/],
     respond: () =>
-      reply(
-        `You can message us on WhatsApp: ${CONTACT.whatsappNumber}\nOr visit: ${PATHS.contact}`,
-        [SUGG.WHATSAPP, SUGG.CONTACT, SUGG.GET_QUOTE]
-      ),
+      reply(`${pick(tone.contact)}\nContact page: ${PATHS.contact}`, [
+        SUGG.WHATSAPP,
+        SUGG.CONTACT,
+        SUGG.GET_QUOTE,
+      ]),
   },
 ];
 
 const FALLBACK = () =>
-  reply(
-    pick([
-      pick(tone.clarify),
-      "Tell me what you need help with: **quote**, **claims**, or **understanding cover** — and the product (motor/home/funeral/life/retirement).",
-      `If you want, message us directly on WhatsApp: ${CONTACT.whatsappNumber}`,
-    ]),
-    [SUGG.GET_QUOTE, SUGG.SHORT, SUGG.LONG, SUGG.CLAIMS, SUGG.WHATSAPP]
-  );
+  reply(pick(tone.fallback), [
+    SUGG.GET_QUOTE,
+    SUGG.TV_STAND,
+    SUGG.PANELS,
+    SUGG.WARDROBES,
+    SUGG.KITCHEN,
+    SUGG.WHATSAPP,
+  ]);
 
 function detectIntent(text: string): Intent | null {
   const scores = INTENTS.map((intent) => {
@@ -244,22 +243,21 @@ function detectIntent(text: string): Intent | null {
 
 export async function POST(req: Request) {
   let text = "";
-  let raw = "";
 
   try {
     const body = await req.json();
-    raw = String(body?.message ?? "");
+    const raw = String(body?.message ?? "");
     text = normalize(raw);
   } catch {}
 
-  // Empty message: greet + menu
   if (!text) {
     return NextResponse.json(
-      reply(`${pick(tone.greet)}\nWhat can I help you with?`, [
+      reply(`${pick(tone.greet)}\n\nWhat do you want to build?`, [
         SUGG.GET_QUOTE,
-        SUGG.SHORT,
-        SUGG.LONG,
-        SUGG.CLAIMS,
+        SUGG.TV_STAND,
+        SUGG.PANELS,
+        SUGG.WARDROBES,
+        SUGG.KITCHEN,
         SUGG.WHATSAPP,
       ])
     );
@@ -275,21 +273,9 @@ export async function POST(req: Request) {
   if (includesAny(text, ["whatsapp", "wa", "chat"])) {
     return NextResponse.json(
       reply(
-        `Sure — WhatsApp is ${CONTACT.whatsappNumber}.\nTell me what you need: quote / claim / policy help.`,
-        [SUGG.WHATSAPP, SUGG.GET_QUOTE, SUGG.CLAIMS]
+        `Sure — WhatsApp is ${CONTACT.whatsappNumber}.\nTell me what you want to build (TV stand / wall panels / wardrobes / kitchen).`,
+        [SUGG.WHATSAPP, SUGG.GET_QUOTE, SUGG.MEASUREMENTS]
       )
-    );
-  }
-
-  // Edge-case: typed known path phrase
-  if (includesAny(text, ["short term", "short-term"])) {
-    return NextResponse.json(
-      INTENTS.find((i) => i.name === "short_term")!.respond(text)
-    );
-  }
-  if (includesAny(text, ["long term", "long-term"])) {
-    return NextResponse.json(
-      INTENTS.find((i) => i.name === "long_term")!.respond(text)
     );
   }
 

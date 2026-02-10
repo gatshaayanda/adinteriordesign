@@ -2,26 +2,39 @@
 
 import Link from "next/link";
 import {
-  ShieldCheck,
+  Sparkles,
   MessageCircle,
-  FileText,
   PhoneCall,
+  FileText,
   Facebook,
   Instagram,
   Music,
 } from "lucide-react";
 
-/*
- * Footer component for Sparkle Legacy
- *
- * Provides brand summary, WhatsApp support, quick navigation and information about how we work.
+/**
+ * Footer — AD Interior Design
+ * - Brand summary
+ * - WhatsApp quote CTA + callback request
+ * - Quick links
+ * - How it works (measurements + photos)
  */
 
-const WHATSAPP_NUMBER = "+26772971852";
+const WHATSAPP_NUMBER = "+267 77 807 112";
+
+// Add real links later (do not ship wrong socials)
+const SOCIALS = {
+  instagram: "",
+  tiktok: "",
+  facebook: "",
+};
 
 function waLink(message: string) {
   const digits = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}
+
+function telLink() {
+  return `tel:${WHATSAPP_NUMBER.replace(/[^\d+]/g, "")}`;
 }
 
 export default function Footer() {
@@ -36,71 +49,73 @@ export default function Footer() {
         {/* Brand overview */}
         <section aria-labelledby="footer-brand">
           <h4 id="footer-brand" className="text-lg font-extrabold tracking-tight mb-2">
-            Sparkle Legacy
+            AD Interior Design
           </h4>
 
           <p className="text-[--muted] leading-relaxed">
-            Modern digital insurance concierge for Botswana. We simplify cover
-            selection, provide fast quotes, track claims and keep you informed
-            every step of the way.
+            Custom interior builds made clean and premium — TV stands & wall units, wall panels,
+            wardrobes/closets, and kitchens. Send your measurements + photos and we’ll quote fast.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="badge">Short-Term</span>
-            <span className="badge">Long-Term</span>
-            <span className="badge">Retirement</span>
-            <span className="badge">SME</span>
-            <span className="badge">Claims</span>
+            <span className="badge">TV Stands</span>
+            <span className="badge">Wall Panels</span>
+            <span className="badge">Wardrobes</span>
+            <span className="badge">Kitchens</span>
+            <span className="badge">Installation</span>
           </div>
 
-          {/* Social media */}
+          {/* Social media (only show if set) */}
           <div className="mt-4 flex gap-3 items-center">
-            {/* Instagram */}
-            <a
-              href="https://www.instagram.com/sparklelegacyinsurancebrokers/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
-            >
-              <Instagram size={16} />
-            </a>
+            {SOCIALS.instagram ? (
+              <a
+                href={SOCIALS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
+              >
+                <Instagram size={16} />
+              </a>
+            ) : null}
 
-            {/* TikTok (song icon) */}
-            <a
-              href="https://www.tiktok.com/@sparklelegacyinsurancebr"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="TikTok"
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
-            >
-              <Music size={16} />
-            </a>
+            {SOCIALS.tiktok ? (
+              <a
+                href={SOCIALS.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
+              >
+                <Music size={16} />
+              </a>
+            ) : null}
 
-            {/* Facebook */}
-            <a
-              href="https://www.facebook.com/Sparkle-Legacy-Insurance-Brokers-61557773288268/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
-            >
-              <Facebook size={16} />
-            </a>
+            {SOCIALS.facebook ? (
+              <a
+                href={SOCIALS.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-[--border] text-[--muted] hover:text-[--foreground] hover:bg-[--surface]"
+              >
+                <Facebook size={16} />
+              </a>
+            ) : null}
           </div>
         </section>
 
         {/* WhatsApp support */}
         <section aria-labelledby="footer-contact">
           <h4 id="footer-contact" className="text-lg font-bold mb-2">
-            Need Help?
+            Need a Quote?
           </h4>
 
           <ul className="space-y-2 text-[--muted]">
             <li>
               <a
                 href={waLink(
-                  "Hi Sparkle Legacy 👋 I need help with a quote / policy / claim."
+                  "Hi AD Interior Design 👋 I’d like a quote. I’ll share my city/town, measurements, and photos of the space."
                 )}
                 className="inline-flex items-center gap-2 hover:underline"
               >
@@ -111,8 +126,18 @@ export default function Footer() {
 
             <li>
               <a
+                href={telLink()}
+                className="inline-flex items-center gap-2 hover:underline"
+              >
+                <PhoneCall size={18} />
+                Call us
+              </a>
+            </li>
+
+            <li>
+              <a
                 href={waLink(
-                  "Hi Sparkle Legacy 👋 Please call me.\n\nName:\nBest time:\nTopic (quote/policy/claim):"
+                  "Hi AD Interior Design 👋 Please call me.\n\nName:\nBest time:\nProject (TV stand / panels / wardrobe / kitchen):\nCity/Town:"
                 )}
                 className="inline-flex items-center gap-2 hover:underline"
               >
@@ -125,7 +150,7 @@ export default function Footer() {
           <div className="mt-4">
             <a
               href={waLink(
-                "Hi Sparkle Legacy 👋 I’d like a quote:\n\nCover type:\nProduct:\nCity/Town:\nNotes:"
+                "Hi AD Interior Design 👋 I’d like a quote:\n\nProject:\nSpace (lounge/bedroom/etc):\nCity/Town:\nMeasurements (W×H):\nFinish (slats/marble/wood/gloss/matte):\nNotes:\n\nI will also send photos/videos of the space."
               )}
               className="btn btn-primary w-full"
             >
@@ -143,11 +168,10 @@ export default function Footer() {
 
           <ul className="space-y-2 text-[--muted]">
             <li><Link href="/">Home</Link></li>
-            <li><Link href="/c/short-term">Short-Term</Link></li>
-            <li><Link href="/c/long-term">Long-Term</Link></li>
-            <li><Link href="/c/retirement">Retirement</Link></li>
-            <li><Link href="/c/business">SME Cover</Link></li>
-            <li><Link href="/claims">Claims</Link></li>
+            <li><Link href="/services">Services</Link></li>
+            <li><Link href="/gallery">Gallery</Link></li>
+            <li><Link href="/pricing">Pricing</Link></li>
+            <li><Link href="/about">About</Link></li>
             <li><Link href="/contact">Contact</Link></li>
           </ul>
         </nav>
@@ -159,25 +183,24 @@ export default function Footer() {
           </h4>
 
           <p className="text-[--muted] leading-relaxed">
-            Browse the cover types and products, then request a quote. We’ll
-            confirm requirements, help you choose the right cover and keep you
-            updated throughout the process.
+            Pick what you want to build, send your measurements and a photo/video of the space, and
+            we’ll confirm the design, materials, timeline, and total price before we start.
           </p>
 
           <div className="mt-4 card">
             <div className="card-inner">
               <p className="text-[--foreground] font-semibold inline-flex items-center gap-2">
-                <ShieldCheck size={16} /> Tip
+                <Sparkles size={16} /> Tip
               </p>
               <p className="text-[--muted] mt-1">
-                For faster quotes or claims, provide clear details and supporting
-                documents. Not sure what’s required? Ask us directly.
+                For the fastest quote, send: (1) wall width & height, (2) TV size (if TV stand),
+                (3) finish choice (slats/marble/wood), and (4) clear photos/video of the space.
               </p>
 
               <div className="mt-3">
                 <a
                   href={waLink(
-                    "Hi Sparkle Legacy 👋 What documents do you need for my quote/claim?"
+                    "Hi AD Interior Design 👋 What measurements do you need for an accurate quote? I can send photos/video too."
                   )}
                   className="btn btn-outline w-full"
                 >
@@ -193,16 +216,21 @@ export default function Footer() {
       {/* Bottom strip */}
       <div className="border-t border-[--border] relative z-10">
         <div className="container py-4 flex flex-col md:flex-row justify-between text-xs text-[--muted] gap-2">
-          <div>&copy; {year} Sparkle Legacy Insurance Brokers. All rights reserved.</div>
-          <div>Cover terms, premiums and benefits depend on insurer underwriting.</div>
+          <div>&copy; {year} AD Interior Design. All rights reserved.</div>
+          <div>Final pricing depends on measurements, materials, and installation requirements.</div>
         </div>
       </div>
 
       {/* Gradient animation */}
       <style jsx global>{`
         @keyframes neonflow {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
         }
         .animate-neonflow {
           background-size: 200% 200%;

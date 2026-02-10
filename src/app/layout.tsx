@@ -27,9 +27,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Sparkle Legacy Insurance Brokers — Botswana",
+  title: "AD Interior Design — TV Stands, Wall Panels & Custom Interiors | Botswana",
   description:
-    "A modern digital insurance concierge for Botswana. Quotes, claims, and policy support.",
+    "Premium TV stands, slat wall panels, marble panels, floating cabinets, wardrobes and custom interior builds. Based in Botswana. WhatsApp for a quote: +267 77 807 112.",
 };
 
 export default function RootLayout({
@@ -38,17 +38,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      data-theme="dark"
-      className={`${montserrat.variable} ${inter.variable}`}
-    >
+    <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
       <body className="bg-[--background] text-[--foreground] antialiased font-sans">
         <Loader />
 
         <AnalyticsProvider>
           <div className="min-h-screen flex flex-col">
-            <div className="sticky top-0 z-40 bg-[--background]/80 backdrop-blur border-b border-white/10">
+            <div className="sticky top-0 z-40 bg-[--background]/85 backdrop-blur border-b border-[--border]">
               <Header />
             </div>
 

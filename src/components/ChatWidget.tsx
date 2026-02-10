@@ -8,7 +8,7 @@ import {
   Send,
   ClipboardList,
   Phone,
-  ShieldCheck,
+  Sparkles,
   ExternalLink,
 } from "lucide-react";
 
@@ -18,16 +18,18 @@ type Stage = "browse" | "inquire" | "lead" | "handoff";
 type Lead = {
   name: string;
   phone: string;
-  coverType: string;
-  product: string;
+  projectType: string; // TV Stand / Wall Panels / Wardrobe / Kitchen / Other
+  space: string; // Lounge / Bedroom / Office / Reception / etc.
+  budget: string; // optional range
   city: string;
-  note: string;
+  timeline: string; // ASAP / This month / Next month
+  note: string; // measurements / style / colors / link to inspo
 };
 
-const STORAGE_KEY = "sparkle_chat_history_v1";
-const LEAD_KEY = "sparkle_chat_lead_v1";
+const STORAGE_KEY = "ad_chat_history_v1";
+const LEAD_KEY = "ad_chat_lead_v1";
 
-const WHATSAPP_NUMBER = "+26772971852";
+const WHATSAPP_NUMBER = "+267 77 807 112";
 
 function waLink(message: string) {
   const digits = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
@@ -66,17 +68,19 @@ export default function ChatWidget() {
   const [lead, setLead] = useState<Lead>({
     name: "",
     phone: "",
-    coverType: "",
-    product: "",
+    projectType: "",
+    space: "",
+    budget: "",
     city: "",
+    timeline: "",
     note: "",
   });
 
   const FALLBACKS = useMemo(
     () => [
-      "I can help with quotes, claims, and policy questions. Tell me what you need (motor, home, funeral, life, retirement).",
-      "Not sure what you need? Tell me your situation and I’ll suggest the best cover type.",
-      "For fastest help, tap “Get a quote” and I’ll open WhatsApp with a ready-to-send message.",
+      "I can help you get a quote fast. What do you want to build — TV stand, wall panels, wardrobe, kitchen, or something custom?",
+      "If you share your city/town and rough measurements, I can draft a WhatsApp quote message for you.",
+      "For quickest service, tap “Get a quote” — I’ll open WhatsApp with a ready-to-send request.",
     ],
     []
   );
@@ -84,7 +88,7 @@ export default function ChatWidget() {
   const rotatedFallback = () => FALLBACKS[fallbackIdx.current++ % FALLBACKS.length];
 
   const DEFAULT_SUGGESTIONS = useMemo(
-    () => ["Get a quote", "Short-Term cover", "Long-Term cover", "Claims help", "Talk on WhatsApp"],
+    () => ["Get a quote", "TV Stand / Wall Unit", "Wall Panels", "Wardrobes", "Kitchen", "Talk on WhatsApp"],
     []
   );
 
@@ -107,11 +111,8 @@ export default function ChatWidget() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
     } catch {}
 
-    // scroll
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 
-    // unread only when closed and a NEW message comes in
-    // (we only count bot messages to reduce noise)
     if (!open && messages.length) {
       const last = messages[messages.length - 1];
       if (last?.sender === "bot") setUnread((u) => u + 1);
@@ -130,13 +131,12 @@ export default function ChatWidget() {
         {
           sender: "bot",
           text:
-            "Hi 👋 I’m the Sparkle Legacy assistant.\nI can help you understand cover, request a quote, or guide you on claims.\n\nWhat do you need help with today?",
+            "Hi 👋 I’m the AD Interior Design assistant.\nI can help you pick a design, estimate a quote, and open WhatsApp with a ready-to-send request.\n\nWhat do you want to build today?",
         },
       ]);
       setSuggestions(DEFAULT_SUGGESTIONS);
     }
 
-    // focus input after open
     const t = setTimeout(() => inputRef.current?.focus(), 120);
     return () => clearTimeout(t);
   }, [open, messages.length, DEFAULT_SUGGESTIONS]);
@@ -162,14 +162,18 @@ export default function ChatWidget() {
       .map((m) => `${m.sender === "user" ? "Me" : "Assistant"}: ${clampText(m.text, 220)}`);
 
     const lines = [
-      "Hi Sparkle Legacy 👋 I’d like a quote:",
+      "Hi AD Interior Design 👋 I’d like a quote:",
       "",
       `Name: ${leadData.name || "-"}`,
       `Phone: ${leadData.phone || "-"}`,
-      `Cover type: ${leadData.coverType || "-"}`,
-      `Product: ${leadData.product || "-"}`,
+      `Project: ${leadData.projectType || "-"}`,
+      `Space: ${leadData.space || "-"}`,
       `City/Town: ${leadData.city || "-"}`,
-      `Notes: ${leadData.note || "-"}`,
+      `Budget range (optional): ${leadData.budget || "-"}`,
+      `Timeline: ${leadData.timeline || "-"}`,
+      `Notes / measurements / colors: ${leadData.note || "-"}`,
+      "",
+      "If possible, I’ll also send photos/videos of the space + inspiration examples.",
       "",
       cleanTranscript.length ? "— Chat context —" : "",
       ...cleanTranscript,
@@ -208,7 +212,7 @@ export default function ChatWidget() {
 
   const onSuggestion = (s: string) => {
     if (s === "Talk on WhatsApp") {
-      window.location.href = waLink("Hi Sparkle Legacy 👋 I need help with a quote / policy / claim.");
+      window.location.href = waLink("Hi AD Interior Design 👋 I need a quote for a TV stand / wall panels / wardrobes / kitchen.");
       return;
     }
 
@@ -222,18 +226,21 @@ export default function ChatWidget() {
       return;
     }
 
-    if (s === "Short-Term cover") {
-      window.location.href = "/c/short-term";
+    // Service quick prompts (no route jumps — keep it simple + WhatsApp-first)
+    if (s === "TV Stand / Wall Unit") {
+      sendMessage("I want a TV stand / wall unit. What info do you need for a quote?");
       return;
     }
-
-    if (s === "Long-Term cover") {
-      window.location.href = "/c/long-term";
+    if (s === "Wall Panels") {
+      sendMessage("I want wall panels (slats / marble / feature wall). What info do you need for a quote?");
       return;
     }
-
-    if (s === "Claims help") {
-      window.location.href = "/claims";
+    if (s === "Wardrobes") {
+      sendMessage("I want a wardrobe / closet build. What measurements and options do you need?");
+      return;
+    }
+    if (s === "Kitchen") {
+      sendMessage("I want a kitchen build. What should I send for an accurate quote?");
       return;
     }
 
@@ -244,9 +251,11 @@ export default function ChatWidget() {
     const clean: Lead = {
       name: lead.name.trim(),
       phone: lead.phone.trim(),
-      coverType: lead.coverType.trim(),
-      product: lead.product.trim(),
+      projectType: lead.projectType.trim(),
+      space: lead.space.trim(),
+      budget: lead.budget.trim(),
       city: lead.city.trim(),
+      timeline: lead.timeline.trim(),
       note: lead.note.trim(),
     };
 
@@ -257,7 +266,7 @@ export default function ChatWidget() {
     const url = toWhatsAppQuote(clean, messages);
     setLeadOpen(false);
     setStage("handoff");
-    pushBot("Opening WhatsApp now ✅", ["Short-Term cover", "Long-Term cover", "Claims help", "Talk on WhatsApp"]);
+    pushBot("Opening WhatsApp now ✅", ["TV Stand / Wall Unit", "Wall Panels", "Wardrobes", "Kitchen", "Talk on WhatsApp"]);
     window.location.href = url;
   };
 
@@ -271,10 +280,10 @@ export default function ChatWidget() {
           className="fixed z-50 bottom-6 right-6 h-14 w-14 rounded-full grid place-items-center text-white shadow-lg select-none"
           style={{
             background:
-              "radial-gradient(circle at 30% 30%, rgba(56,189,248,0.96), rgba(29,78,216,0.96) 55%, rgba(45,212,191,0.92) 100%)",
-            boxShadow: "0 14px 32px rgba(11, 18, 32, 0.22), 0 0 18px rgba(56,189,248,0.14)",
+              "radial-gradient(circle at 30% 30%, rgba(201,162,106,0.95), rgba(15,23,42,0.96) 55%, rgba(51,65,85,0.94) 100%)",
+            boxShadow: "0 14px 32px rgba(2, 6, 23, 0.20), 0 0 18px rgba(201,162,106,0.12)",
           }}
-          aria-label="Open Sparkle Legacy chat"
+          aria-label="Open AD Interior Design chat"
         >
           <MessageCircle size={22} />
           {unread > 0 && (
@@ -282,7 +291,7 @@ export default function ChatWidget() {
               className="absolute -top-1 -right-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold"
               style={{
                 background: "rgba(239,68,68,0.95)",
-                boxShadow: "0 8px 18px rgba(239,68,68,0.25)",
+                boxShadow: "0 8px 18px rgba(239,68,68,0.20)",
               }}
             >
               {unread}
@@ -299,12 +308,12 @@ export default function ChatWidget() {
           style={{
             width: "min(92vw, 22.5rem)",
             height: leadOpen ? "33.5rem" : "28.5rem",
-            background: "rgba(7, 11, 20, 0.96)",
-            borderColor: "rgba(255,255,255,0.10)",
-            animation: "sparkleSlideIn 0.42s cubic-bezier(0.45,0,0.25,1)",
+            background: "rgba(255,255,255,0.96)",
+            borderColor: "var(--border)",
+            animation: "adSlideIn 0.42s cubic-bezier(0.45,0,0.25,1)",
           }}
           role="dialog"
-          aria-label="Sparkle Legacy Assistant"
+          aria-label="AD Interior Design Assistant"
           aria-modal="false"
         >
           {/* Header */}
@@ -314,22 +323,24 @@ export default function ChatWidget() {
                 className="h-8 w-8 rounded-full grid place-items-center font-extrabold text-[11px] border border-[--border]"
                 style={{
                   background:
-                    "radial-gradient(circle at 30% 30%, rgba(56,189,248,0.12), rgba(29,78,216,0.10) 55%, rgba(45,212,191,0.10) 100%)",
+                    "radial-gradient(circle at 30% 30%, rgba(201,162,106,0.22), rgba(15,23,42,0.08) 55%, rgba(51,65,85,0.10) 100%)",
                 }}
                 aria-hidden="true"
               >
-                SL
+                AD
               </div>
 
               <div className="leading-tight">
                 <div className="font-extrabold text-sm inline-flex items-center gap-2">
-                  Sparkle Legacy Assistant
+                  AD Interior Assistant
                   <span className="badge" style={{ fontSize: 12, padding: "0.18rem 0.55rem" }}>
-                    <ShieldCheck size={14} /> Secure help
+                    <Sparkles size={14} /> Quick quote
                   </span>
                 </div>
                 <div className="text-[11px] text-[--muted] mt-0.5">
-                  {stage === "lead" ? "Quote request" : "Online • Quotes • Claims • Policies"}
+                  {stage === "lead"
+                    ? "Quote request"
+                    : "Online • TV stands • Wall panels • Wardrobes • Kitchens"}
                 </div>
               </div>
             </div>
@@ -353,12 +364,12 @@ export default function ChatWidget() {
                   <div
                     className={`px-3 py-2 rounded-2xl max-w-[85%] whitespace-pre-line border ${
                       isUser
-                        ? "bg-white/10 text-[--foreground] border-white/10"
+                        ? "bg-black/5 text-[--foreground] border-black/10"
                         : "bg-[--surface] text-[--foreground] border-[--border]"
                     }`}
                     style={{
-                      boxShadow: isUser ? "none" : "0 10px 22px rgba(11,18,32,0.08)",
-                      animation: "sparkleBubbleIn 160ms ease-out",
+                      boxShadow: isUser ? "none" : "0 10px 22px rgba(2,6,23,0.06)",
+                      animation: "adBubbleIn 160ms ease-out",
                     }}
                   >
                     {m.text}
@@ -370,9 +381,9 @@ export default function ChatWidget() {
             {typing && (
               <div className="flex justify-start">
                 <div className="px-3 py-2 rounded-2xl bg-[--surface] border border-[--border] text-[--foreground]">
-                  <span className="sparkle-typing-dot" />
-                  <span className="sparkle-typing-dot" style={{ animationDelay: "120ms" }} />
-                  <span className="sparkle-typing-dot" style={{ animationDelay: "240ms" }} />
+                  <span className="ad-typing-dot" />
+                  <span className="ad-typing-dot" style={{ animationDelay: "120ms" }} />
+                  <span className="ad-typing-dot" style={{ animationDelay: "240ms" }} />
                 </div>
               </div>
             )}
@@ -389,7 +400,7 @@ export default function ChatWidget() {
                   Quote details
                 </div>
                 <a
-                  href={waLink("Hi Sparkle Legacy 👋 I’d like help with a quote.")}
+                  href={waLink("Hi AD Interior Design 👋 I’d like a quote (I’ll send photos and measurements).")}
                   className="text-xs inline-flex items-center gap-1 text-[--muted] hover:underline"
                   aria-label="Open WhatsApp without form"
                 >
@@ -409,11 +420,12 @@ export default function ChatWidget() {
                 placeholder="Phone (optional)"
                 className="input"
               />
+
               <div className="flex gap-2">
                 <input
-                  value={lead.coverType}
-                  onChange={(e) => setLead((s) => ({ ...s, coverType: e.target.value }))}
-                  placeholder="Cover type (Short-Term / Long-Term)"
+                  value={lead.projectType}
+                  onChange={(e) => setLead((s) => ({ ...s, projectType: e.target.value }))}
+                  placeholder="Project (TV stand / Panels / Wardrobe / Kitchen)"
                   className="input"
                 />
                 <input
@@ -423,22 +435,39 @@ export default function ChatWidget() {
                   className="input"
                 />
               </div>
+
+              <div className="flex gap-2">
+                <input
+                  value={lead.space}
+                  onChange={(e) => setLead((s) => ({ ...s, space: e.target.value }))}
+                  placeholder="Space (Lounge / Bedroom / Office)"
+                  className="input"
+                />
+                <input
+                  value={lead.timeline}
+                  onChange={(e) => setLead((s) => ({ ...s, timeline: e.target.value }))}
+                  placeholder="Timeline (ASAP / This month / Next month)"
+                  className="input"
+                />
+              </div>
+
               <input
-                value={lead.product}
-                onChange={(e) => setLead((s) => ({ ...s, product: e.target.value }))}
-                placeholder="Product (Motor, Funeral, Life, Home...)"
+                value={lead.budget}
+                onChange={(e) => setLead((s) => ({ ...s, budget: e.target.value }))}
+                placeholder="Budget range (optional)"
                 className="input"
               />
+
               <textarea
                 rows={2}
                 value={lead.note}
                 onChange={(e) => setLead((s) => ({ ...s, note: e.target.value }))}
-                placeholder="Notes (e.g. vehicle model, sum assured, dependants)"
+                placeholder="Notes: measurements, colors, finish (gloss/matte), TV size, marble/slats, LED…"
                 className="input"
               />
 
               <div className="flex gap-2 pt-1">
-                <button type="button" onClick={submitLead} className="btn btn-primary">
+                <button type="button" onClick={submitLead} className="btn btn-whatsapp">
                   <Phone size={18} /> Send to WhatsApp
                 </button>
                 <button
@@ -464,7 +493,7 @@ export default function ChatWidget() {
                   key={`${s}-${i}`}
                   type="button"
                   onClick={() => onSuggestion(s)}
-                  className="text-xs px-3 py-1 rounded-full border border-[--border] text-[--foreground] hover:bg-black/5 dark:hover:bg-white/5 transition"
+                  className="text-xs px-3 py-1 rounded-full border border-[--border] text-[--foreground] hover:bg-black/5 transition"
                 >
                   {s}
                 </button>
@@ -482,7 +511,7 @@ export default function ChatWidget() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") sendMessage();
                 }}
-                placeholder="Ask: motor cover, funeral, life, claims…"
+                placeholder="Ask: TV stand, wall panels, wardrobes, kitchen…"
                 className="flex-1 input"
                 aria-label="Type your message"
               />
@@ -501,7 +530,7 @@ export default function ChatWidget() {
       )}
 
       <style jsx global>{`
-        @keyframes sparkleSlideIn {
+        @keyframes adSlideIn {
           from {
             transform: translateY(18px);
             opacity: 0;
@@ -512,7 +541,7 @@ export default function ChatWidget() {
           }
         }
 
-        @keyframes sparkleBubbleIn {
+        @keyframes adBubbleIn {
           from {
             transform: scale(0.985);
             opacity: 0.7;
@@ -523,7 +552,7 @@ export default function ChatWidget() {
           }
         }
 
-        @keyframes sparkleTyping {
+        @keyframes adTyping {
           0%,
           80%,
           100% {
@@ -536,19 +565,19 @@ export default function ChatWidget() {
           }
         }
 
-        .sparkle-typing-dot {
+        .ad-typing-dot {
           display: inline-block;
           width: 6px;
           height: 6px;
           margin-right: 4px;
           background: linear-gradient(
             90deg,
-            rgba(56, 189, 248, 0.95),
-            rgba(29, 78, 216, 0.95),
-            rgba(45, 212, 191, 0.95)
+            rgba(15, 23, 42, 0.92),
+            rgba(201, 162, 106, 0.92),
+            rgba(51, 65, 85, 0.92)
           );
           border-radius: 999px;
-          animation: sparkleTyping 1.35s infinite ease-in-out;
+          animation: adTyping 1.35s infinite ease-in-out;
         }
 
         @media (prefers-reduced-motion: reduce) {
