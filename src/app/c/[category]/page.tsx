@@ -3,7 +3,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -40,11 +39,10 @@ type ServiceCategory =
 
 type ServiceItem = {
   id: string;
-  title: string;
+  name: string;
   category: ServiceCategory;
-  summary?: string;
-  bullets?: string[];
-  imageUrl?: string;
+  description?: string | null;
+  imageUrl?: string | null;
   active?: boolean;
   order?: number;
 };
@@ -176,14 +174,18 @@ export default function CategoryPage() {
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[--border] bg-[--surface] text-xs">
                 <span className="text-[--brand-primary]">{meta.icon}</span>
-                <span className="text-[--muted]">AD Interior Design • Botswana</span>
+                <span className="text-[--muted]">
+                  AD Interior Design • Botswana
+                </span>
               </div>
 
               <h1 className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight text-[--foreground]">
                 {meta.title}
               </h1>
 
-              <p className="mt-2 text-[--muted] leading-relaxed">{meta.subtitle}</p>
+              <p className="mt-2 text-[--muted] leading-relaxed">
+                {meta.subtitle}
+              </p>
 
               {/* Sub-nav */}
               <div className="mt-5 flex flex-wrap gap-2">
@@ -198,6 +200,7 @@ export default function CategoryPage() {
                 >
                   TV Stands
                 </Link>
+
                 <Link
                   href="/c/wall-panels"
                   prefetch={false}
@@ -209,6 +212,7 @@ export default function CategoryPage() {
                 >
                   Wall Panels
                 </Link>
+
                 <Link
                   href="/c/wardrobes"
                   prefetch={false}
@@ -220,6 +224,7 @@ export default function CategoryPage() {
                 >
                   Wardrobes
                 </Link>
+
                 <Link
                   href="/c/kitchens"
                   prefetch={false}
@@ -231,19 +236,41 @@ export default function CategoryPage() {
                 >
                   Kitchens
                 </Link>
-                <Link href="/gallery" prefetch={false} className="menu-link">
-                  Gallery
+
+                <Link
+                  href="/c/ceilings"
+                  prefetch={false}
+                  className={`menu-link ${
+                    category === "ceilings"
+                      ? "bg-[--surface-2] border border-[--border] text-[--foreground]"
+                      : ""
+                  }`}
+                >
+                  Ceilings
                 </Link>
-                <Link href="/contact" prefetch={false} className="menu-link">
-                  Contact
+
+                <Link
+                  href="/c/doors"
+                  prefetch={false}
+                  className={`menu-link ${
+                    category === "doors"
+                      ? "bg-[--surface-2] border border-[--border] text-[--foreground]"
+                      : ""
+                  }`}
+                >
+                  Doors
+                </Link>
+
+                <Link href="/services" prefetch={false} className="menu-link">
+                  Services
                 </Link>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2">
-              <Link href="/contact" prefetch={false} className="btn btn-outline">
+              <Link href="/services" prefetch={false} className="btn btn-outline">
                 <FileText size={18} />
-                Contact
+                Services
               </Link>
 
               <a
@@ -300,10 +327,11 @@ export default function CategoryPage() {
             </p>
 
             <div className="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
-              <Link href="/contact" prefetch={false} className="btn btn-outline">
+              <Link href="/services" prefetch={false} className="btn btn-outline">
                 <FileText size={18} />
-                Contact
+                Services
               </Link>
+
               <a
                 href={waLink(defaultQuoteMsg)}
                 target="_blank"
@@ -320,7 +348,7 @@ export default function CategoryPage() {
             {items.map((s) => {
               const msg = [
                 "Hi AD Interior Design 👋",
-                `I’d like a quote for: ${s.title}`,
+                `I’d like a quote for: ${s.name}`,
                 `Category: ${meta.title}`,
                 "",
                 "My details:",
@@ -340,28 +368,29 @@ export default function CategoryPage() {
                   key={s.id}
                   className="rounded-2xl border border-[--border] bg-[--surface] overflow-hidden hover:bg-[--surface-2] transition"
                 >
-                  <div className="relative h-40">
-                    {s.imageUrl ? (
-                      <Image
-                        src={s.imageUrl}
-                        alt={s.title}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-[--surface-2]" />
-                    )}
+                  <div className="relative h-40 bg-[--surface-2]">
+                    <img
+                      src={s.imageUrl?.trim() || "/placeholder.png"}
+                      alt={s.name}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src =
+                          "/placeholder.png";
+                      }}
+                    />
                   </div>
 
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="font-semibold text-base text-[--foreground]">
-                          {s.title}
+                          {s.name}
                         </div>
-                        {s.summary ? (
-                          <p className="text-sm text-[--muted] mt-2 leading-relaxed">
-                            {s.summary}
+
+                        {s.description ? (
+                          <p className="text-sm text-[--muted] mt-2 leading-relaxed line-clamp-3">
+                            {s.description}
                           </p>
                         ) : null}
                       </div>
@@ -370,17 +399,6 @@ export default function CategoryPage() {
                         <ChevronRight size={18} />
                       </div>
                     </div>
-
-                    {!!s.bullets?.length && (
-                      <ul className="mt-4 space-y-2 text-sm text-[--muted]">
-                        {s.bullets.slice(0, 4).map((b, idx) => (
-                          <li key={idx} className="flex gap-2">
-                            <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[--muted-2]" />
-                            <span className="leading-relaxed">{b}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
 
                     <div className="mt-5 flex gap-2">
                       <a
@@ -393,8 +411,12 @@ export default function CategoryPage() {
                         Request Quote
                       </a>
 
-                      <Link href="/contact" prefetch={false} className="btn btn-outline">
-                        Contact
+                      <Link
+                        href="/services"
+                        prefetch={false}
+                        className="btn btn-outline"
+                      >
+                        Services
                       </Link>
                     </div>
 

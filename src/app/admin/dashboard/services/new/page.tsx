@@ -8,7 +8,7 @@ import { firestore } from "@/utils/firebaseConfig";
 import { UploadButton } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
-type ServiceCategory =
+type Category =
   | "tv-stands"
   | "wall-panels"
   | "wardrobes"
@@ -23,48 +23,32 @@ export default function NewServicePage() {
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
-    title: "",
-    category: "tv-stands" as ServiceCategory,
-    summary: "",
-    bulletsText: "", // newline separated
-    order: "",
-    active: true,
-    featured: false,
+    name: "",
+    category: "tv-stands" as Category,
     imageUrl: "",
+    description: "",
   });
 
   const save = async () => {
-    if (!form.title.trim()) return alert("Title is required.");
-
-    const order = form.order.trim() ? Number(form.order) : null;
-    if (form.order.trim() && !Number.isFinite(order)) {
-      return alert("Order must be a number.");
-    }
-
-    const bullets = form.bulletsText
-      .split("\n")
-      .map((x) => x.trim())
-      .filter(Boolean);
+    if (!form.name.trim()) return alert("Service name required");
+    if (!form.category) return alert("Category required");
 
     setSaving(true);
     try {
       await addDoc(collection(firestore, "services"), {
-        title: form.title.trim(),
+        name: form.name.trim(),
         category: form.category,
-        summary: form.summary.trim() || null,
-        bullets: bullets.length ? bullets : null,
-        order: order ?? null,
-        active: !!form.active,
-        featured: !!form.featured,
         imageUrl: form.imageUrl.trim() || "/placeholder.png",
+        description: form.description.trim() || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        admin_id: "admin",
       });
 
       router.push("/admin/dashboard/services");
     } catch (err) {
       console.error("Save failed:", err);
-      alert("Failed to save service item.");
+      alert("Failed to save service");
     } finally {
       setSaving(false);
     }
@@ -72,43 +56,63 @@ export default function NewServicePage() {
 
   return (
     <main className="bg-[--background] text-[--foreground]">
-      <section className="container py-10 max-w-2xl">
-        <div className="flex items-start justify-between gap-3 flex-wrap">
+      <section className="container py-10 max-w-3xl">
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
+            <div className="badge mb-3">Admin • Create</div>
             <h1 className="text-3xl font-extrabold tracking-tight">
-              New Service Item
+              New Service
             </h1>
-            <p className="text-sm text-[--muted] mt-1">
-              This powers /c/[category] and can be featured on the site.
+            <p className="mt-2 text-sm text-[--muted]">
+              Add a service to the public catalog.
             </p>
           </div>
 
-          <button onClick={() => history.back()} className="btn btn-outline">
-            Cancel
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => history.back()}
+              className="btn btn-outline"
+            >
+              Cancel
+            </button>
+            <button
+              disabled={saving}
+              onClick={save}
+              className="btn btn-primary"
+            >
+              {saving ? "Saving…" : "Save Service"}
+            </button>
+          </div>
         </div>
 
-        <div className="mt-6 space-y-4 rounded-2xl border border-[--border] bg-[--surface] p-6 shadow-[var(--shadow)]">
-          <div className="space-y-2">
-            <label className="text-sm font-extrabold">Title</label>
-            <input
-              className="input"
-              placeholder="e.g. Floating TV Stand (LED + Storage)"
-              value={form.title}
-              onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
-            />
-          </div>
+        {/* Form */}
+        <div className="mt-6 card">
+          <div className="card-inner space-y-5">
 
-          <div className="grid sm:grid-cols-2 gap-4">
+            {/* Name */}
             <div className="space-y-2">
-              <label className="text-sm font-extrabold">Category</label>
+              <label className="text-sm font-bold">Service name</label>
+              <input
+                className="input"
+                placeholder="e.g. Modern TV Stand / Custom Wardrobe"
+                value={form.name}
+                onChange={(e) =>
+                  setForm((s) => ({ ...s, name: e.target.value }))
+                }
+              />
+            </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <label className="text-sm font-bold">Category</label>
               <select
                 className="input"
                 value={form.category}
                 onChange={(e) =>
                   setForm((s) => ({
                     ...s,
-                    category: e.target.value as ServiceCategory,
+                    category: e.target.value as Category,
                   }))
                 }
               >
@@ -119,132 +123,103 @@ export default function NewServicePage() {
                 <option value="ceilings">Ceilings</option>
                 <option value="doors">Doors</option>
               </select>
-              <p className="text-xs text-[--muted]">
-                Must match /c/{form.category}
-              </p>
             </div>
 
+            {/* Upload Section */}
+            <div className="rounded-xl border border-[--border] bg-[--surface] p-4">
+              <div className="flex flex-col gap-3">
+                <div>
+                  <div className="font-extrabold">Service image</div>
+                  <div className="text-sm text-[--muted]">
+                    Upload an image.
+                  </div>
+                </div>
+
+                <UploadButton<OurFileRouter, "fileUploader">
+                  endpoint="fileUploader"
+                  appearance={{
+                    button:
+                      "bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700",
+                    allowedContent:
+                      "text-sm text-gray-600",
+                  }}
+                  content={{
+                    button: "Choose File",
+                  }}
+                  onClientUploadComplete={(res) => {
+                    const first: UploadedFile = Array.isArray(res)
+                      ? res[0]
+                      : null;
+                    const url = first?.url;
+                    if (url) {
+                      setForm((s) => ({ ...s, imageUrl: url }));
+                    }
+                  }}
+                  onUploadError={(error: Error) => {
+                    alert(`Upload failed: ${error.message}`);
+                  }}
+                />
+
+                {form.imageUrl && (
+                  <div className="text-xs text-[--muted-2] break-all">
+                    Uploaded URL:
+                    <div className="text-[--foreground] mt-1">
+                      {form.imageUrl}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Manual URL */}
             <div className="space-y-2">
-              <label className="text-sm font-extrabold">Order (optional)</label>
+              <label className="text-sm font-bold">
+                Image URL (optional)
+              </label>
               <input
                 className="input"
-                placeholder="e.g. 1"
-                value={form.order}
-                onChange={(e) => setForm((s) => ({ ...s, order: e.target.value }))}
+                placeholder="https://..."
+                value={form.imageUrl}
+                onChange={(e) =>
+                  setForm((s) => ({ ...s, imageUrl: e.target.value }))
+                }
               />
-              <p className="text-xs text-[--muted]">
-                Lower numbers show first.
-              </p>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-extrabold">Summary (optional)</label>
-            <textarea
-              className="input"
-              rows={3}
-              placeholder="Short summary shown on cards."
-              value={form.summary}
-              onChange={(e) => setForm((s) => ({ ...s, summary: e.target.value }))}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-extrabold">
-              Bullets (optional)
-            </label>
-            <textarea
-              className="input"
-              rows={5}
-              placeholder={"One bullet per line.\nLED strip option\nSoft-close hinges\nMatte / gloss finishes"}
-              value={form.bulletsText}
-              onChange={(e) =>
-                setForm((s) => ({ ...s, bulletsText: e.target.value }))
-              }
-            />
-          </div>
-
-          {/* Toggles */}
-          <div className="flex flex-wrap gap-4 pt-2">
-            <label className="inline-flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.active}
+            {/* Description */}
+            <div className="space-y-2">
+              <label className="text-sm font-bold">
+                Description (optional)
+              </label>
+              <textarea
+                className="input"
+                rows={5}
+                placeholder="Add materials, finishes, sizing notes, etc."
+                value={form.description}
                 onChange={(e) =>
-                  setForm((s) => ({ ...s, active: e.target.checked }))
+                  setForm((s) => ({ ...s, description: e.target.value }))
                 }
               />
-              Active
-            </label>
+            </div>
 
-            <label className="inline-flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.featured}
-                onChange={(e) =>
-                  setForm((s) => ({ ...s, featured: e.target.checked }))
-                }
-              />
-              Featured
-            </label>
-          </div>
+            {/* Bottom Buttons */}
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                onClick={() => history.back()}
+                className="btn btn-outline"
+                disabled={saving}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={save}
+                className="btn btn-primary"
+                disabled={saving}
+              >
+                {saving ? "Saving…" : "Save Service"}
+              </button>
+            </div>
 
-          {/* UploadThing */}
-          <div className="space-y-2 pt-2">
-            <div className="text-sm font-extrabold">Upload image</div>
-
-            <UploadButton<OurFileRouter, "fileUploader">
-              endpoint="fileUploader"
-              onClientUploadComplete={(res) => {
-                const first: UploadedFile = Array.isArray(res) ? res[0] : null;
-                const url = first?.url;
-                if (url) setForm((s) => ({ ...s, imageUrl: url }));
-              }}
-              onUploadError={(error: Error) => {
-                alert(`Upload failed: ${error.message}`);
-              }}
-            />
-
-            {form.imageUrl ? (
-              <div className="text-xs text-[--muted] break-all">
-                Current image URL: {form.imageUrl}
-              </div>
-            ) : (
-              <div className="text-xs text-[--muted]">
-                If you don’t upload, we’ll use /placeholder.png
-              </div>
-            )}
-          </div>
-
-          {/* Manual URL */}
-          <div className="space-y-2">
-            <label className="text-sm font-extrabold">Or paste image URL</label>
-            <input
-              className="input"
-              placeholder="https://..."
-              value={form.imageUrl}
-              onChange={(e) =>
-                setForm((s) => ({ ...s, imageUrl: e.target.value }))
-              }
-            />
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              disabled={saving}
-              onClick={save}
-              className="btn btn-primary"
-            >
-              {saving ? "Saving…" : "Save"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => history.back()}
-              className="btn btn-outline"
-            >
-              Cancel
-            </button>
           </div>
         </div>
       </section>

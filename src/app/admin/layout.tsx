@@ -1,9 +1,10 @@
+// src/app/admin/layout.tsx
+import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "AD Interior Design – Admin",
+  title: "Ad Interior– Admin",
 };
 
 export default async function AdminLayout({
@@ -11,16 +12,12 @@ export default async function AdminLayout({
 }: {
   children: ReactNode;
 }) {
-  const store = await cookies();
-  const token = store.get("admin_token")?.value;
+  // ✅ works whether cookies() is typed as async or sync in your Next version
+  const token = (await cookies()).get("admin_token")?.value;
 
   if (!token) {
-    redirect("/admin/login");
+    redirect("/login");
   }
 
-  return (
-    <div className="min-h-screen bg-[--background] text-[--foreground]">
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 }
